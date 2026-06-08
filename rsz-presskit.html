@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rain Station Z — Press Kit</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #111;
+    background: #fff;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  /* Header */
+  header { border-bottom: 3px solid #111; padding-bottom: 32px; margin-bottom: 40px; }
+  header h1 { font-size: 52px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+  header .tagline { font-size: 18px; color: #555; margin: 8px 0 24px; }
+
+  /* Fact row */
+  .facts { display: flex; gap: 0; flex-wrap: wrap; border: 1px solid #ddd; }
+  .fact { padding: 12px 20px; border-right: 1px solid #ddd; flex: 1; min-width: 160px; }
+  .fact:last-child { border-right: none; }
+  .fact-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 3px; }
+  .fact-value { font-weight: 600; font-size: 14px; }
+
+  /* Sections */
+  section { margin-bottom: 48px; }
+  h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #888; margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+  p { color: #333; margin-bottom: 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* Features */
+  ul.features { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  ul.features li { padding: 14px 16px; background: #f5f5f5; font-size: 14px; }
+  ul.features li strong { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  /* Screenshots */
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .shot { aspect-ratio: 16/9; background: #f0f0f0; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #aaa; }
+  .shot:first-child { grid-column: span 2; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Trailer placeholder */
+  .trailer { aspect-ratio: 16/9; background: #111; display: flex; align-items: center; justify-content: center; color: #666; font-size: 13px; }
+  .trailer iframe { width: 100%; height: 100%; border: none; }
+
+  /* Contact */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .contact-block p { margin-bottom: 4px; font-size: 14px; }
+  .contact-block a { color: #111; }
+  .asset-list { list-style: none; }
+  .asset-list li { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+  .asset-list li a { color: #111; text-decoration: none; }
+  .asset-list li a:hover { text-decoration: underline; }
+
+  /* Footer */
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #aaa; }
+
+  @media (max-width: 600px) {
+    ul.features, .shots, .contact-grid { grid-template-columns: 1fr; }
+    .shot:first-child { grid-column: span 1; }
+    .fact { min-width: 50%; border-bottom: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <!-- REPLACE with <img src="logo.png" alt="Rain Station Z" style="height:60px;margin-bottom:16px;display:block;"> -->
+  <h1>Rain Station Z</h1>
+  <p class="tagline">A post-apocalyptic multiplayer survival game</p>
+
+  <div class="facts">
+    <div class="fact">
+      <div class="fact-label">Developer</div>
+      <div class="fact-value">Wobbly Tooth</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Platforms</div>
+      <div class="fact-value">PC (Steam), Nintendo Switch, PlayStation 5</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Release</div>
+      <div class="fact-value">TBA</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Players</div>
+      <div class="fact-value">12 Online</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Price</div>
+      <div class="fact-value">$4.99</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── ABOUT ── -->
+<section>
+  <h2>About</h2>
+  <p><strong>Rain Station Z</strong> is a post-apocalyptic multiplayer survival game set in a world reclaimed by rot, ruin, and the relentless dead. Built on Unreal Engine 5 for PC and Nintendo Switch, it drops players into a hostile open world where resources are scarce, trust is earned, and every decision carries weight.</p>
+  <p>Atmospheric multiplayer online zombie survival. Follows on from my cult hit Ice Station Z which was originally for Nintendo 3DS. Featuring Missions, Journals and Secret Locations to discover</p>
+</section>
+
+<!-- ── FEATURES ── -->
+<section>
+  <h2>Key Features</h2>
+  <ul class="features">
+    <li><strong>Multiplayer Survival</strong>Co-op, PvP, PvPvE. Become friends by waving to other players. Free text chat with others.</li>
+    <li><strong>Open World Scavenging</strong>Food, Ammo, Weapons, Medical supplies, Horse riding, Journals, Jackets, Boots, Backpacks.</li>
+    <li><strong>Zombies</strong>Zombie decaying in acid rain. Later dry zombies appear. NPC Survivors can turn into zombies if not stopped.</li>
+        <li><strong>Three Platforms planned</strong>PC via Steam and Nintendo Switch, then PlayStation 5.</li>
+    <li><strong>Acid Rain falls relentlessly</strong>Umbrellas protect your gear from acid rain and are also melee weapons.</li>
+  </ul>
+</section>
+
+<!-- ── SCREENSHOTS ── -->
+<section>
+  <h2>Screenshots</h2>
+  <!--
+    REPLACE each .shot div with:
+    <div class="shot"><img src="screenshot1.jpg" alt="Description"></div>
+  -->
+  <div class="shots">
+    <div class="shot"><img src="images/screenshot01.jpg" alt="Rain Station Z screenshot 1"></div>
+    <div class="shot"><img src="images/screenshot02.jpg" alt="Rain Station Z screenshot 2"></div>
+    <div class="shot"><img src="images/screenshot04.jpg" alt="Rain Station Z screenshot 4"></div>
+    <div class="shot"><img src="images/screenshot07.jpg" alt="Rain Station Z screenshot 7"></div>
+    <div class="shot"><img src="images/screenshot10.jpg" alt="Rain Station Z screenshot 10"></div>
+  </div>
+</section>
+
+<!-- ── TRAILER ── -->
+<section>
+  <h2>Trailer</h2>
+  <!--
+    REPLACE .trailer div with:
+    <div class="trailer">
+      <iframe src="https://www.youtube.com/embed/YOUR_ID" allowfullscreen></iframe>
+    </div>
+  -->
+  <div class="trailer"><iframe src="https://www.youtube.com/embed/t-pXFw6_LJQ" allowfullscreen></iframe></div>
+</section>
+
+<!-- ── CONTACT & ASSETS ── -->
+<section>
+  <h2>Press Contact &amp; Assets</h2>
+  <div class="contact-grid">
+    <div class="contact-block">
+      <p><strong>Wobbly Tooth</strong></p>
+      <p>Solo Indie Game Developer</p>
+      <p><a href="mailto:markg@wobbly-tooth.com">markg@wobbly-tooth.com</a></p>
+      <p><a href="https://www.wobbly-tooth.com">www.wobbly-tooth.com</a></p>
+      <p><a href="https://twitter.com/wobblytoothltd">@wobblytoothltd</a></p>
+    </div>
+    <div class="contact-block">
+      <p><strong>Download Assets</strong></p>
+      <ul class="asset-list">
+        <li><a href="https://www.dropbox.com/scl/fi/4gx1gjssgcjlajcwhtmgb/rsz_logo.png?rlkey=se24nrz89d4qucsceyls94wv2&st=0ytyv9fj&dl=1">↓ Logo (PNG)</a></li>
+        <li><a href="https://www.dropbox.com/scl/fi/a0yxj51jqt79u179z59gd/rsz_screenshots.zip?rlkey=638nt88g8v6170c4qql2f7ane&st=3ne2qsyw&dl=1">↓ Screenshots Pack</a></li>
+        <li><a href="https://www.dropbox.com/scl/fi/kq8muklqp6p3ghrfo6vu5/rsz_4k.png?rlkey=2iwkpfb07izppco5k77ieeu7n&st=d1weckoc&dl=1">↓ Key Art (4K)</a></li>
+        <li><a href="https://www.dropbox.com/scl/fi/2bejnso38o6v6665ugfxh/trailer_steam.mp4?rlkey=hoqn9azm7e7wcixmfd715c55c&st=79t1nbk1&dl=1">↓ Trailer (MP4)</a></li>       
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 Wobbly Tooth. All rights reserved.</footer>
+
+</body>
+</html>
