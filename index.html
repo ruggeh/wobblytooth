@@ -72,7 +72,7 @@ nav {
 
 /* ─── HERO ─── */
 .hero {
-  height:100vh; min-height:600px;
+  height:100vh; height:100svh; min-height:600px;
   position:relative;
   display:flex; align-items:flex-end;
   overflow:hidden;
@@ -247,11 +247,19 @@ footer {
 }
 
 /* ─── RESPONSIVE ─── */
-@media(max-width:860px){
+@media(max-width:980px){
   nav { padding:14px 24px; }
   .hero-content { padding:0 24px 56px; }
   .wrap { padding-left:24px; padding-right:24px; }
-  .game { grid-template-columns:1fr; gap:32px; }
+  .game { grid-template-columns:1fr; gap:28px; }
+  /* Video first when stacked, then the text below it */
+  .game-media { order:-1; }
+  /* Let the description breathe on small screens */
+  .game-desc {
+    max-width:none;
+    font-size:16px; font-weight:400;
+    line-height:1.7;
+  }
   footer { padding:28px 24px; }
   .foot-links { flex-wrap:wrap; gap:16px; }
 }
