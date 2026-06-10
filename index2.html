@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wobbly Tooth Indie Game Developer</title>
+<meta name="description" content="Solo indie game developer. Making atmospheric multiplayer survival games.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;900&family=Courier+Prime:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* The survival manual palette */
+  --paper:    #e7dfc8;   /* aged bone paper */
+  --paper2:   #ddd3b6;   /* manila, darker sections */
+  --ink:      #1c1914;   /* typewriter ink */
+  --faded:    #5b5546;   /* faded ink */
+  --orange:   #d4481d;   /* emergency orange */
+  --stamp:    #b03526;   /* rubber stamp red */
+  --pencil:   #314f72;   /* blue grease pencil */
+  --night:    #0b0c0e;   /* transmission screen */
+  --nightline:#23262b;
+  --D: 'Big Shoulders Stencil Display', sans-serif;
+  --T: 'Courier Prime', monospace;
+  --H: 'Permanent Marker', cursive;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--T);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* Paper grain over everything light */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:60;
+}
+
+::selection { background:var(--orange); color:var(--paper); }
+
+/* ─── SCROLL REVEAL ─── */
+.rv {
+  opacity:0; transform:translateY(34px);
+  transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.rv.in { opacity:1; transform:translateY(0); }
+.rv.d1 { transition-delay:0.12s; }
+.rv.d2 { transition-delay:0.24s; }
+
+/* ─── NAV : manual header strip ─── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 44px;
+  background:var(--paper);
+  border-bottom:2px solid var(--ink);
+  transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+nav.hide { transform:translateY(-100%); }
+.nav-logo {
+  font-family:var(--D); font-size:23px; font-weight:900;
+  letter-spacing:0.02em; color:var(--ink); text-decoration:none;
+  text-transform:uppercase;
+}
+.nav-logo span { color:var(--orange); }
+.nav-ref {
+  font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--faded);
+  display:none;
+}
+.nav-links { display:flex; gap:26px; list-style:none; align-items:center; }
+.nav-links a {
+  font-family:var(--T); font-size:11px; font-weight:700;
+  letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink); text-decoration:none;
+  position:relative;
+}
+.nav-links a:not(.nav-cta)::after {
+  content:''; position:absolute; left:0; bottom:-4px;
+  width:100%; height:2px; background:var(--orange);
+  transform:scaleX(0); transform-origin:right;
+  transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.nav-links a:not(.nav-cta):hover::after { transform:scaleX(1); transform-origin:left; }
+.nav-cta {
+  background:var(--orange); color:var(--paper) !important;
+  padding:7px 15px;
+  box-shadow:3px 3px 0 var(--ink);
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.nav-cta:hover { transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink); }
+/* Grease pencil scroll progress */
+.progress {
+  position:absolute; bottom:-2px; left:0; height:3px; width:0;
+  background:var(--orange);
+}
+
+/* ─── HERO : the transmission ─── */
+.hero {
+  height:100vh; min-height:640px;
+  position:relative;
+  display:flex; align-items:flex-end;
+  overflow:hidden;
+  background:var(--night);
+  color:#d8dcd2;
+}
+.hero-bg {
+  position:absolute; inset:-4%;
+  /* background.jpg paints on top when present; the gradients beneath
+     act as a storm-sky fallback if the images folder is missing */
+  background-image:
+    url('images/background.jpg'),
+    radial-gradient(ellipse 90% 60% at 70% 20%, #2a3038 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 20% 80%, #1b222b 0%, transparent 65%),
+    linear-gradient(165deg, #14181d 0%, #0b0c0e 55%, #101417 100%);
+  background-size:cover, cover, cover, cover;
+  background-position:center;
+  opacity:0.55;
+  animation:hero-drift 30s ease-in-out infinite alternate;
+}
+@keyframes hero-drift {
+  from { transform:scale(1); }
+  to   { transform:scale(1.06) translateY(-1.5%); }
+}
+.hero-grad {
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to top, var(--night) 12%, transparent 55%),
+    linear-gradient(to right, rgba(11,12,14,0.92) 0%, transparent 65%);
+}
+/* CRT scanlines on the transmission only.
+   Tiled via background-size with a soft, low-alpha line to avoid
+   moiré banding at fractional device-pixel ratios */
+.hero::after {
+  content:'';
+  position:absolute; inset:0; z-index:3;
+  background-image:linear-gradient(to bottom, rgba(0,0,0,0.07) 0, rgba(0,0,0,0.07) 1px, transparent 1px);
+  background-size:100% 4px;
+  pointer-events:none;
+}
+#rain {
+  position:absolute; top:0; left:0;
+  width:100%; height:100%;
+  display:block;
+  z-index:1; pointer-events:none;
+}
+
+/* Transmission status bar */
+.tx-bar {
+  position:absolute; top:74px; left:44px; right:44px; z-index:4;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+  color:#8d978f;
+  opacity:0; animation:fade-in 0.8s 0.3s forwards;
+}
+.tx-bar .rec { color:var(--orange); display:flex; align-items:center; gap:7px; }
+.tx-bar .rec::before {
+  content:''; width:8px; height:8px; border-radius:50%;
+  background:var(--orange);
+  animation:rec-blink 1.4s steps(1) infinite;
+}
+@keyframes rec-blink { 0%,60% { opacity:1; } 61%,100% { opacity:0.15; } }
+@keyframes fade-in { to { opacity:1; } }
+
+.hero-content {
+  position:relative; z-index:4;
+  padding:0 44px 120px;
+  max-width:860px;
+}
+.hero-seq { opacity:0; transform:translateY(26px); animation:rise 0.9s cubic-bezier(0.16,1,0.3,1) forwards; }
+.s1 { animation-delay:0.4s; }
+.s2 { animation-delay:0.65s; }
+.s3 { animation-delay:1.05s; }
+.s4 { animation-delay:1.25s; }
+@keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+.tx-line {
+  font-size:11px; font-weight:700; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--orange);
+  margin-bottom:18px;
+  min-height:1.2em;
+}
+.tx-line .caret {
+  display:inline-block; width:9px; height:1.1em;
+  background:var(--orange); vertical-align:text-bottom;
+  animation:caret 0.9s steps(1) infinite;
+  margin-left:2px;
+}
+@keyframes caret { 0%,49% { opacity:1; } 50%,100% { opacity:0; } }
+
+.hero-title {
+  font-family:var(--D);
+  font-size:clamp(70px,11.5vw,160px);
+  font-weight:900; line-height:0.84;
+  letter-spacing:0.01em; text-transform:uppercase;
+  color:#e7dfc8;
+  margin-bottom:26px;
+  text-shadow:0 4px 0 rgba(0,0,0,0.45);
+}
+.hero-title em {
+  color:var(--orange); font-style:normal; display:inline-block;
+  animation:tx-glitch 8s infinite;
+}
+@keyframes tx-glitch {
+  0%, 94%, 100% { transform:none; opacity:1; }
+  94.4% { transform:translate(-3px,1px) skewX(-5deg); opacity:0.8; }
+  94.8% { transform:translate(3px,-1px); }
+  95.2% { transform:none; opacity:1; }
+  97%   { opacity:0.85; }
+  97.3% { opacity:1; }
+}
+.hero-sub {
+  font-size:15px; color:#aab3a8; max-width:430px;
+  margin-bottom:38px;
+}
+.btn-row { display:flex; gap:14px; flex-wrap:wrap; }
+.btn {
+  font-family:var(--T); font-size:11px; font-weight:700;
+  letter-spacing:0.14em; text-transform:uppercase; text-decoration:none;
+  padding:14px 24px;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:transform 0.15s, box-shadow 0.15s, background 0.2s, color 0.2s;
+}
+.btn-solid {
+  background:var(--orange); color:var(--paper);
+  box-shadow:4px 4px 0 rgba(0,0,0,0.55);
+}
+.btn-solid:hover { transform:translate(2px,2px); box-shadow:2px 2px 0 rgba(0,0,0,0.55); }
+.btn-ghost {
+  background:transparent; color:#d8dcd2;
+  border:1px solid #4a5048;
+}
+.btn-ghost:hover { border-color:var(--orange); color:var(--orange); }
+
+/* Torn paper edge between transmission and manual */
+.tear {
+  position:absolute; bottom:-2px; left:0; right:0; z-index:5;
+  display:block; width:100%; height:54px;
+}
+
+/* ─── HAZARD TAPE ─── */
+.tape {
+  overflow:hidden; white-space:nowrap;
+  background:repeating-linear-gradient(-45deg, var(--orange) 0 26px, var(--ink) 26px 52px);
+  padding:0;
+  position:relative;
+}
+.tape-inner {
+  background:var(--paper);
+  margin:7px 0;
+  padding:8px 0;
+  overflow:hidden; white-space:nowrap;
+}
+.tape-track { display:inline-block; animation:tape-scroll 32s linear infinite; }
+.tape span {
+  font-size:11px; font-weight:700; letter-spacing:0.3em;
+  text-transform:uppercase; color:var(--ink); padding:0 26px;
+}
+.tape span b { color:var(--orange); font-weight:700; }
+@keyframes tape-scroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+.tape:hover .tape-track { animation-play-state:paused; }
+
+/* ─── LAYOUT ─── */
+.wrap { max-width:1180px; margin:0 auto; padding:0 44px; }
+.section { padding:90px 0; }
+.section.manila { background:var(--paper2); border-top:2px solid var(--ink); }
+
+.section-head {
+  margin-bottom:60px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:22px;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap;
+}
+.sec-ref {
+  font-size:10px; font-weight:700; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--orange);
+  margin-bottom:8px;
+  min-height:1.2em;
+}
+.section-title {
+  font-family:var(--D);
+  font-size:clamp(44px,6vw,84px);
+  font-weight:900; text-transform:uppercase;
+  line-height:0.88; letter-spacing:0.01em;
+}
+.sec-note {
+  font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--faded); text-align:right;
+}
+
+/* ─── DOSSIERS ─── */
+.dossier {
+  position:relative;
+  border:2px solid var(--ink);
+  background:var(--paper);
+  margin-bottom:56px;
+  box-shadow:6px 6px 0 rgba(28,25,20,0.16);
+}
+.dossier:last-child { margin-bottom:0; }
+
+/* Ring binder holes down the left edge */
+.dossier::before {
+  content:'';
+  position:absolute; top:0; bottom:0; left:26px;
+  width:1px;
+  border-left:1px dashed rgba(28,25,20,0.3);
+}
+.holes {
+  position:absolute; top:0; bottom:0; left:8px;
+  width:12px;
+  display:flex; flex-direction:column; justify-content:space-evenly;
+}
+.holes i {
+  width:11px; height:11px; border-radius:50%;
+  background:var(--paper2);
+  border:1.5px solid rgba(28,25,20,0.45);
+  box-shadow:inset 1px 1px 2px rgba(28,25,20,0.35);
+}
+
+.dossier-head {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap;
+  padding:16px 28px 16px 56px;
+  border-bottom:2px solid var(--ink);
+}
+.dossier-id {
+  font-size:11px; font-weight:700; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--faded);
+}
+.dossier-id b { color:var(--orange); }
+
+/* Rubber stamp */
+.stamp {
+  font-family:var(--T); font-weight:700;
+  font-size:13px; letter-spacing:0.24em; text-transform:uppercase;
+  color:var(--stamp);
+  border:3px double var(--stamp);
+  padding:6px 14px;
+  transform:rotate(-6deg);
+  mix-blend-mode:multiply;
+  opacity:0.92;
+  position:relative;
+}
+.stamp.incoming { color:var(--orange); border-color:var(--orange); }
+.stamp.incoming::after {
+  content:''; display:inline-block;
+  width:7px; height:7px; border-radius:50%;
+  background:var(--orange); margin-left:9px;
+  animation:rec-blink 1.4s steps(1) infinite;
+}
+/* Stamp slam on reveal */
+.stamp.slam {
+  opacity:0;
+  transform:rotate(-22deg) scale(2.6);
+}
+.stamp.slam.hit {
+  animation:slam 0.45s cubic-bezier(0.34,1.3,0.64,1) forwards;
+}
+@keyframes slam {
+  0%   { opacity:0; transform:rotate(-22deg) scale(2.6); }
+  60%  { opacity:1; transform:rotate(-4deg) scale(0.94); }
+  100% { opacity:0.92; transform:rotate(-6deg) scale(1); }
+}
+
+.dossier-body {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:48px; align-items:start;
+  padding:36px 28px 40px 56px;
+}
+
+.game-name {
+  font-family:var(--D);
+  font-size:clamp(38px,4.4vw,68px);
+  font-weight:900; text-transform:uppercase;
+  line-height:0.88; margin-bottom:16px;
+}
+.spec-row {
+  font-size:10px; font-weight:700; letter-spacing:0.16em;
+  text-transform:uppercase; color:var(--faded);
+  margin-bottom:18px;
+}
+.game-desc {
+  font-size:14.5px; line-height:1.8; color:#332e25;
+  margin-bottom:28px; max-width:400px;
+}
+.store-row { display:flex; gap:10px; flex-wrap:wrap; }
+.store-btn {
+  font-family:var(--T); font-size:10.5px; font-weight:700;
+  letter-spacing:0.12em; text-transform:uppercase; text-decoration:none;
+  padding:11px 17px;
+  transition:transform 0.15s, box-shadow 0.15s, color 0.2s, border-color 0.2s, background 0.2s;
+}
+.store-btn.solid {
+  background:var(--ink); color:var(--paper);
+  box-shadow:3px 3px 0 rgba(28,25,20,0.3);
+}
+.store-btn.solid:hover { background:var(--orange); transform:translate(1px,1px); box-shadow:2px 2px 0 rgba(28,25,20,0.3); }
+.store-btn.outline {
+  background:transparent; color:var(--ink);
+  border:1.5px solid var(--ink);
+}
+.store-btn.outline:hover { color:var(--orange); border-color:var(--orange); }
+
+/* Field photo : the video, taped to the page */
+.photo {
+  position:relative;
+  transform:rotate(1.6deg);
+  transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.dossier:nth-of-type(even) .photo { transform:rotate(-1.4deg); }
+.photo:hover { transform:rotate(0deg) scale(1.012); }
+.photo-frame {
+  background:#f4efe0;
+  padding:10px 10px 34px;
+  box-shadow:0 8px 22px rgba(28,25,20,0.3);
+}
+.photo-cap {
+  position:absolute; bottom:8px; left:14px; right:14px;
+  display:flex; justify-content:space-between;
+  font-size:9.5px; font-weight:700; letter-spacing:0.16em;
+  text-transform:uppercase; color:var(--faded);
+}
+/* Masking tape corners */
+.photo::before, .photo::after {
+  content:'';
+  position:absolute; z-index:2;
+  width:92px; height:26px;
+  background:rgba(214,202,165,0.85);
+  box-shadow:0 1px 3px rgba(28,25,20,0.25);
+  opacity:0.9;
+}
+.photo::before { top:-12px; left:-26px; transform:rotate(-38deg); }
+.photo::after  { top:-12px; right:-26px; transform:rotate(38deg); }
+
+.vid {
+  position:relative; z-index:1; aspect-ratio:16/9;
+  background:var(--ink); overflow:hidden; cursor:pointer;
+}
+.vid img {
+  width:100%; height:100%; object-fit:cover; display:block;
+  filter:saturate(0.85) contrast(1.04);
+  transition:transform 0.5s cubic-bezier(0.16,1,0.3,1), filter 0.3s;
+}
+.vid img[src=""], .vid img:not([src]) { display:none; }
+.vid:hover img { transform:scale(1.05); filter:saturate(1) contrast(1.05); }
+.vid iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+.vid .play {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.vid .ring {
+  width:58px; height:58px; border-radius:50%;
+  background:var(--orange);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; padding-left:4px; color:var(--paper);
+  box-shadow:0 4px 14px rgba(0,0,0,0.45);
+  transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
+}
+.vid:hover .ring {
+  transform:scale(1.16);
+  box-shadow:0 0 0 8px rgba(212,72,29,0.22), 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* Handwritten margin note */
+.note {
+  position:absolute;
+  font-family:var(--H);
+  font-size:19px; line-height:1.3;
+  color:var(--pencil);
+  transform:rotate(-4deg);
+  max-width:170px;
+  pointer-events:none;
+  z-index:3;
+}
+.note svg { display:block; margin-top:4px; }
+
+/* ─── ARCHIVE (videos) ─── */
+.vgrid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:34px 28px;
+}
+.frame {
+  position:relative;
+  transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.frame:nth-child(odd)  { transform:rotate(1.1deg); }
+.frame:nth-child(even) { transform:rotate(-1.2deg); }
+.frame:hover { transform:rotate(0) translateY(-5px); }
+.frame .photo-frame { padding:8px 8px 28px; }
+.frame .photo-cap { bottom:7px; left:12px; right:12px; font-size:9px; }
+.frame::before {
+  content:'';
+  position:absolute; top:-11px; left:50%; z-index:2;
+  width:96px; height:24px; margin-left:-48px;
+  transform:rotate(-2deg);
+  background:rgba(214,202,165,0.85);
+  box-shadow:0 1px 3px rgba(28,25,20,0.25);
+}
+.more-row { text-align:center; margin-top:52px; }
+.btn-ink {
+  font-family:var(--T); font-size:11px; font-weight:700;
+  letter-spacing:0.14em; text-transform:uppercase; text-decoration:none;
+  padding:14px 26px;
+  color:var(--ink); border:2px solid var(--ink);
+  display:inline-block;
+  transition:background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.15s;
+  box-shadow:4px 4px 0 rgba(28,25,20,0.18);
+}
+.btn-ink:hover {
+  background:var(--ink); color:var(--paper);
+  transform:translate(2px,2px); box-shadow:2px 2px 0 rgba(28,25,20,0.18);
+}
+
+/* ─── FOOTER : back cover ─── */
+footer {
+  background:var(--ink);
+  color:#cfc7ad;
+  padding:48px 44px 40px;
+  position:relative;
+}
+.foot-top {
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:18px;
+  max-width:1180px; margin:0 auto;
+}
+.foot-logo {
+  font-family:var(--D); font-size:26px; font-weight:900;
+  text-transform:uppercase; color:var(--paper);
+}
+.foot-logo span { color:var(--orange); }
+.foot-links { display:flex; gap:22px; flex-wrap:wrap; }
+.foot-links a {
+  font-size:10.5px; font-weight:700; letter-spacing:0.13em;
+  text-transform:uppercase; color:#9b937c; text-decoration:none;
+  transition:color 0.15s;
+}
+.foot-links a:hover { color:var(--orange); }
+.foot-copy {
+  max-width:1180px; margin:26px auto 0;
+  font-size:10px; letter-spacing:0.08em; color:#6e6754;
+  border-top:1px solid #35302a; padding-top:18px;
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+
+/* ─── REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  *, *::before, *::after {
+    animation-duration:0.001s !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.001s !important;
+  }
+  .rv, .hero-seq, .tx-bar { opacity:1 !important; transform:none !important; }
+  .stamp.slam { opacity:0.92; transform:rotate(-6deg) scale(1); }
+  #rain { display:none; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  nav { padding:12px 22px; }
+  .hero-content { padding:0 22px 110px; }
+  .tx-bar { left:22px; right:22px; }
+  .wrap { padding-left:22px; padding-right:22px; }
+  .dossier-body { grid-template-columns:1fr; gap:36px; padding:30px 22px 36px 50px; }
+  .dossier-head { padding-left:50px; }
+  .note { display:none; }
+  footer { padding:40px 22px 34px; }
+}
+@media(max-width:560px){
+  .nav-links li:nth-child(3),
+  .nav-links li:nth-child(4) { display:none; }
+  .vgrid { grid-template-columns:1fr; }
+  .hero-title { font-size:clamp(56px,15vw,86px); }
+  .section-title { font-size:clamp(36px,9vw,52px); }
+  .game-name { font-size:clamp(32px,9vw,50px); }
+  .btn-row, .store-row { flex-direction:column; }
+  .dossier::before, .holes { display:none; }
+  .dossier-body { padding-left:22px; }
+  .dossier-head { padding-left:22px; }
+}
+</style>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">WOBBLY<span>.</span>TOOTH</a>
+  <ul class="nav-links">
+    <li><a href="#games">Games</a></li>
+    <li><a href="#videos">Videos</a></li>
+    <li><a href="https://www.youtube.com/@wobblytoothgames" target="_blank">YouTube</a></li>
+    <li><a href="https://twitter.com/wobblytoothltd" target="_blank" class="nav-cta">Twitter</a></li>
+  </ul>
+  <div class="progress" id="progress"></div>
+</nav>
+
+<!-- ══ HERO : INCOMING TRANSMISSION ══ -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grad"></div>
+  <canvas id="rain"></canvas>
+
+  <div class="tx-bar">
+    <span class="rec">REC</span>
+    <span>SIGNAL // 026.4 MHz</span>
+    <span>FIELD MANUAL WT-26</span>
+  </div>
+
+  <div class="hero-content">
+    <p class="tx-line hero-seq s1"><span id="typed"></span><span class="caret"></span></p>
+    <h1 class="hero-title hero-seq s2">WOBBLY<br><em>TOOTH</em></h1>
+    <p class="hero-sub hero-seq s3">Building atmospheric multiplayer survival games independently, from the ground up.</p>
+    <div class="btn-row hero-seq s4">
+      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn btn-solid">▶ &nbsp;YouTube Channel</a>
+      <a href="#games" class="btn btn-ghost">↓ &nbsp;Our Games</a>
+    </div>
+  </div>
+
+  <!-- Torn paper edge -->
+  <svg class="tear" viewBox="0 0 1440 54" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#e7dfc8" d="M0,30 L48,22 L96,34 L150,18 L210,32 L268,20 L330,36 L396,16 L452,30 L520,22 L584,38 L648,18 L710,32 L780,20 L846,34 L912,16 L980,30 L1048,22 L1112,36 L1180,18 L1244,32 L1310,20 L1378,34 L1440,24 L1440,54 L0,54 Z"/>
+  </svg>
+</header>
+
+<!-- ══ HAZARD TAPE ══ -->
+<div class="tape" aria-hidden="true">
+  <div class="tape-inner">
+    <div class="tape-track" id="tape-track">
+      <span>Survive <b>//</b></span><span>Craft <b>//</b></span><span>Build <b>//</b></span><span>Explore <b>//</b></span><span>Multiplayer <b>//</b></span><span>Unreal Engine 5 <b>//</b></span><span>PC <b>//</b></span><span>Nintendo Switch <b>//</b></span><span>PlayStation <b>//</b></span><span>Xbox <b>//</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAMES : FIELD DOSSIERS ══ -->
+<section class="section" id="games">
+  <div class="wrap">
+    <div class="section-head rv">
+      <div>
+        <p class="sec-ref" data-type="SECTION 01 / FIELD DOSSIERS">SECTION 01 / FIELD DOSSIERS</p>
+        <h2 class="section-title">Our Titles</h2>
+      </div>
+      <p class="sec-note">Classification: Public<br>Issued by Wobbly Tooth</p>
+    </div>
+
+    <!-- RAIN STATION Z -->
+    <article class="dossier rv">
+      <div class="holes"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="dossier-head">
+        <span class="dossier-id">Dossier <b>RSZ-01</b> // Rain Station Z</span>
+        <span class="stamp incoming slam">Incoming</span>
+      </div>
+      <div class="dossier-body">
+        <div>
+          <h3 class="game-name">Rain Station Z</h3>
+          <p class="spec-row">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch &nbsp;·&nbsp; Mode: Multiplayer</p>
+          <p class="game-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC and Nintendo Switch.</p>
+          <div class="store-row">
+            <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn solid">Wishlist on Steam ↗</a>
+          </div>
+        </div>
+        <div class="photo">
+          <span class="note" style="top:-44px; right:-8px;">wishlist this one!!
+            <svg width="60" height="34" viewBox="0 0 60 34" fill="none"><path d="M8 2 C 20 26, 38 30, 52 22 M52 22 l-10 -2 m10 2 l-4 9" stroke="#314f72" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </span>
+          <div class="photo-frame">
+            <div class="vid" data-id="t-pXFw6_LJQ">
+              <img src="https://img.youtube.com/vi/t-pXFw6_LJQ/hqdefault.jpg" alt="Rain Station Z" loading="lazy">
+              <div class="play"><div class="ring">▶</div></div>
+            </div>
+            <div class="photo-cap"><span>Fig. 1 — Field footage</span><span>RSZ / 2026</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ICE STATION Z -->
+    <article class="dossier rv">
+      <div class="holes"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="dossier-head">
+        <span class="dossier-id">Dossier <b>ISZ-02</b> // Ice Station Z</span>
+        <span class="stamp slam">Deployed</span>
+      </div>
+      <div class="dossier-body">
+        <div>
+          <h3 class="game-name">Ice Station Z</h3>
+          <p class="spec-row">Region: Arctic &nbsp;·&nbsp; Platforms: Switch / PC / PS &nbsp;·&nbsp; Companion: Husky</p>
+          <p class="game-desc">A zombie survival game set in a frozen arctic wasteland. Find weapons, ammo, food and shelter, befriend your husky companion and fight to survive against the undead available now on Nintendo Switch and PC.</p>
+          <div class="store-row">
+            <a href="https://www.nintendo.com/games/detail/ice-station-z-switch/" target="_blank" class="store-btn solid">Nintendo Switch</a>
+            <a href="https://store.steampowered.com/app/1795180/Ice_Station_Z" target="_blank" class="store-btn outline">Steam ↗</a>
+            <a href="https://store.playstation.com/en-gb/concept/10003819" target="_blank" class="store-btn outline">PlayStation ↗</a>
+          </div>
+        </div>
+        <div class="photo">
+          <div class="photo-frame">
+            <div class="vid" data-id="DVFfcqbeVbc">
+              <img src="https://img.youtube.com/vi/DVFfcqbeVbc/hqdefault.jpg" alt="Ice Station Z" loading="lazy">
+              <div class="play"><div class="ring">▶</div></div>
+            </div>
+            <div class="photo-cap"><span>Fig. 2 — Field footage</span><span>ISZ</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- BATTLEMINER GIANTS -->
+    <article class="dossier rv">
+      <div class="holes"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="dossier-head">
+        <span class="dossier-id">Dossier <b>BMG-03</b> // Battleminer Giants</span>
+        <span class="stamp slam">Deployed</span>
+      </div>
+      <div class="dossier-body">
+        <div>
+          <h3 class="game-name">Battleminer Giants</h3>
+          <p class="spec-row">World: Voxel / Celtic &nbsp;·&nbsp; Platforms: Xbox / Switch / PS &nbsp;·&nbsp; Threat: Giants</p>
+          <p class="game-desc">A voxel open world Celtic fantasy adventure from the creator of BattleminerZ. Towering giants roam the land shaping the fate of kingdoms forge alliances, battle colossal enemies, craft, build and uncover ancient secrets hidden across vast block-built landscapes.</p>
+          <div class="store-row">
+            <a href="https://www.xbox.com/en-GB/games/store/battleminer-giants/9nl7z9sx6bzb" target="_blank" class="store-btn solid">Xbox Series X|S</a>
+            <a href="https://www.nintendo.com/en-gb/Games/Nintendo-Switch-download-software/Battleminer-Giants-2691201.html" target="_blank" class="store-btn outline">Nintendo Switch ↗</a>
+            <a href="https://store.playstation.com/en-gb/product/EP3644-CUSA45403_00-0000000000000000" target="_blank" class="store-btn outline">PlayStation ↗</a>
+          </div>
+        </div>
+        <div class="photo">
+          <div class="photo-frame">
+            <div class="vid" data-id="LQaNQeVvVuQ">
+              <img src="https://img.youtube.com/vi/LQaNQeVvVuQ/hqdefault.jpg" alt="Battleminer Giants" loading="lazy">
+              <div class="play"><div class="ring">&#9658;</div></div>
+            </div>
+            <div class="photo-cap"><span>Fig. 3 — Field footage</span><span>BMG</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ══ VIDEOS : ARCHIVE FOOTAGE ══ -->
+<section class="section manila" id="videos">
+  <div class="wrap">
+    <div class="section-head rv">
+      <div>
+        <p class="sec-ref" data-type="SECTION 02 / ARCHIVE FOOTAGE">SECTION 02 / ARCHIVE FOOTAGE</p>
+        <h2 class="section-title">Videos</h2>
+      </div>
+      <p class="sec-note">Devlogs &amp; trailers<br>Recovered media</p>
+    </div>
+    <div class="vgrid" id="video-grid"></div>
+    <div class="more-row rv">
+      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn-ink">More on YouTube ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER : BACK COVER ══ -->
+<footer>
+  <div class="foot-top">
+    <span class="foot-logo">WOBBLY<span>.</span>TOOTH</span>
+    <div class="foot-links">
+      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank">YouTube</a>
+      <a href="https://twitter.com/wobblytoothltd" target="_blank">Twitter</a>
+      <a href="https://store.steampowered.com/app/1795180/Ice_Station_Z" target="_blank">Steam</a>
+      <a href="https://www.nintendo.com/games/detail/ice-station-z-switch/" target="_blank">Nintendo</a>
+      <a href="https://store.playstation.com/en-gb/concept/10003819" target="_blank">PlayStation</a>
+      <a href="https://www.xbox.com/en-GB/games/store/battleminer-giants/9nl7z9sx6bzb" target="_blank">Xbox</a>
+    </div>
+  </div>
+  <p class="foot-copy">
+    <span>© 2026 Wobbly Tooth. All rights reserved.</span>
+    <span>END OF MANUAL // WT-26</span>
+  </p>
+</footer>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   YOUR FEATURED VIDEOS
+   Add or remove YouTube video IDs from this list
+   to control what appears in the Videos section.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+var myVideos = [
+  'rh0Xw1gLTm8',		/* vampire slayer trailer */
+  'Zy_aBy96jfQ',		/* arkady smith */
+  'UOhVp7QoksM',		/* toy stunt bike */
+  'lzdcT3Wf4Rc',		/* battleminerz */
+  'b0NYG7vOkv0'			/* ice station z 3ds */
+];
+
+// Build video grid from the list above, each as a taped archive print
+var grid = document.getElementById('video-grid');
+myVideos.forEach(function(id, i) {
+  var frame = document.createElement('div');
+  frame.className = 'frame rv d' + (i % 3 === 1 ? 1 : (i % 3 === 2 ? 2 : 0));
+  var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+  frame.innerHTML =
+    '<div class="photo-frame">' +
+      '<div class="vid" data-id="' + id + '">' +
+        '<img src="https://img.youtube.com/vi/' + id + '/hqdefault.jpg" loading="lazy">' +
+        '<div class="play"><div class="ring">&#9658;</div></div>' +
+      '</div>' +
+      '<div class="photo-cap"><span>Frame ' + num + '</span><span>Archive</span></div>' +
+    '</div>';
+  grid.appendChild(frame);
+});
+
+// Click to play inline (delegated so it covers grid frames too)
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('.vid');
+  if (!el || el.querySelector('iframe'))
+  {
+    return;
+  }
+  var id = el.dataset.id;
+  el.innerHTML = '<iframe src="https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+});
+
+/* ━━━ Reduced motion ━━━ */
+var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ━━━ Typewriter on the transmission line ━━━ */
+(function() {
+  var target = document.getElementById('typed');
+  var text = 'INCOMING TRANSMISSION // SOLO INDIE GAME DEVELOPER';
+
+  if (reduceMotion)
+  {
+    target.textContent = text;
+    return;
+  }
+
+  var i = 0;
+  function type()
+  {
+    if (i <= text.length)
+    {
+      target.textContent = text.slice(0, i);
+      i++;
+      setTimeout(type, 34);
+    }
+  }
+  setTimeout(type, 700);
+})();
+
+/* ━━━ Scroll reveal + stamp slam ━━━ */
+var revealEls = document.querySelectorAll('.rv');
+
+function activate(el)
+{
+  el.classList.add('in');
+  var stamp = el.querySelector('.stamp.slam');
+  if (stamp)
+  {
+    setTimeout(function() { stamp.classList.add('hit'); }, 420);
+  }
+}
+
+if (reduceMotion || !('IntersectionObserver' in window))
+{
+  revealEls.forEach(function(el) {
+    el.classList.add('in');
+    var stamp = el.querySelector('.stamp.slam');
+    if (stamp)
+    {
+      stamp.classList.add('hit');
+    }
+  });
+}
+else
+{
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting)
+      {
+        activate(entry.target);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(function(el) { io.observe(el); });
+}
+
+/* ━━━ Nav hide/show + progress ━━━ */
+var nav = document.getElementById('nav');
+var progress = document.getElementById('progress');
+var lastY = 0;
+var ticking = false;
+
+function onScroll()
+{
+  var y = window.scrollY;
+
+  if (y > 140 && y > lastY)
+  {
+    nav.classList.add('hide');
+  }
+  else
+  {
+    nav.classList.remove('hide');
+  }
+  lastY = y;
+
+  var max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+
+  ticking = false;
+}
+
+window.addEventListener('scroll', function() {
+  if (!ticking)
+  {
+    window.requestAnimationFrame(onScroll);
+    ticking = true;
+  }
+}, { passive: true });
+
+/* ━━━ Duplicate hazard tape for seamless loop ━━━ */
+var tapeTrack = document.getElementById('tape-track');
+tapeTrack.innerHTML += tapeTrack.innerHTML;
+
+/* ━━━ Hero rain (Rain Station Z) ━━━ */
+(function() {
+  if (reduceMotion)
+  {
+    return;
+  }
+
+  var canvas = document.getElementById('rain');
+  var ctx = canvas.getContext('2d');
+  var heroEl = document.querySelector('.hero');
+  var drops = [];
+  var DROP_COUNT = 110;
+  var running = true;
+
+  function resize()
+  {
+    // Measure the hero itself, not the canvas, so we always
+    // get the real rendered size even before layout settles
+    var rect = heroEl.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.round(rect.width));
+    canvas.height = Math.max(1, Math.round(rect.height));
+
+    // Respawn drops across the new area so rain fills it immediately
+    for (var i = 0; i < drops.length; i++)
+    {
+      drops[i] = makeDrop(true);
+    }
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  // Re-measure once everything (fonts, images) has loaded
+  window.addEventListener('load', resize);
+
+  function makeDrop(randomY)
+  {
+    var depth = 0.35 + Math.random() * 0.65;
+    return {
+      x: Math.random() * (canvas.width + 200) - 100,
+      y: randomY ? Math.random() * canvas.height : -30,
+      len: 12 + depth * 26,
+      speed: 7 + depth * 13,
+      drift: 1.2 + depth * 1.6,
+      alpha: 0.05 + depth * 0.16,
+      depth: depth
+    };
+  }
+
+  for (var i = 0; i < DROP_COUNT; i++)
+  {
+    drops.push(makeDrop(true));
+  }
+
+  function frame()
+  {
+    if (!running)
+    {
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineCap = 'round';
+
+    for (var i = 0; i < drops.length; i++)
+    {
+      var d = drops[i];
+
+      // Pale streaks, the nearest carrying a faint emergency tint
+      var tint = d.depth > 0.85 ? '212,110,60' : '170,185,195';
+      ctx.strokeStyle = 'rgba(' + tint + ',' + d.alpha + ')';
+      ctx.lineWidth = d.depth > 0.8 ? 1.4 : 1;
+
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x - d.drift * (d.len / d.speed), d.y - d.len);
+      ctx.stroke();
+
+      d.y += d.speed;
+      d.x += d.drift;
+
+      if (d.y - d.len > canvas.height)
+      {
+        drops[i] = makeDrop(false);
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  var hero = document.querySelector('.hero');
+  var heroIo = new IntersectionObserver(function(entries) {
+    var visible = entries[0].isIntersecting && !document.hidden;
+    if (visible && !running)
+    {
+      running = true;
+      requestAnimationFrame(frame);
+    }
+    else if (!visible)
+    {
+      running = false;
+    }
+  });
+  heroIo.observe(hero);
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden)
+    {
+      running = false;
+    }
+    else
+    {
+      running = true;
+      requestAnimationFrame(frame);
+    }
+  });
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
