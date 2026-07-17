@@ -7,7 +7,7 @@
 <meta name="description" content="Solo indie game developer. Making atmospheric multiplayer survival games.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500&family=Permanent+Marker&family=Noto+Sans+JP:wght@300;500;900&family=Yusei+Magic&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:      #07080a;
@@ -26,6 +26,24 @@
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
+
+/* ─── JAPANESE EDITION (?lang=ja) ───
+   Latin display faces keep rendering the brand/latin glyphs; Noto Sans JP
+   catches the Japanese. Handwritten notes switch to a JP marker face. */
+html[lang="ja"] {
+  --D: 'Big Shoulders Display', 'Noto Sans JP', sans-serif;
+  --M: 'IBM Plex Mono', 'Noto Sans JP', monospace;
+  --B: 'IBM Plex Sans', 'Noto Sans JP', sans-serif;
+  --H: 'Yusei Magic', 'Permanent Marker', cursive;
+}
+html[lang="ja"] body { font-weight:400; }
+html[lang="ja"] .hero-sub,
+html[lang="ja"] .game-desc { line-height:1.9; }
+html[lang="ja"] .nav-links a { letter-spacing:0.06em; }
+.lang-switch { display:flex; gap:2px; align-items:center; }
+.lang-switch a { padding:2px 5px; }
+.lang-switch a.on { color:var(--accent); }
+.lang-switch span { color:var(--faded); font-size:10px; }
 
 body {
   background: var(--bg);
@@ -612,10 +630,11 @@ footer {
 <nav id="nav">
   <a href="#" class="nav-logo">WOBBLY<span>.</span>TOOTH</a>
   <ul class="nav-links">
-    <li><a href="#games">Games</a></li>
-    <li><a href="#videos">Videos</a></li>
+    <li><a href="#games" data-i18n="nav-games">Games</a></li>
+    <li><a href="#videos" data-i18n="nav-videos">Videos</a></li>
     <li><a href="https://www.youtube.com/@wobblytoothgames" target="_blank">YouTube</a></li>
     <li><a href="https://twitter.com/wobblytoothltd" target="_blank" class="nav-cta">Twitter</a></li>
+    <li class="lang-switch"><a href="?lang=en" id="lang-en">EN</a><span>/</span><a href="?lang=ja" id="lang-ja">日本語</a></li>
   </ul>
   <div class="progress" id="progress"></div>
 </nav>
@@ -635,19 +654,19 @@ footer {
   <div class="hero-content">
     <p class="tx-line hero-seq s1"><span id="typed"></span><span class="caret"></span></p>
     <h1 class="hero-title hero-seq s2">WOBBLY<br><em>TOOTH</em></h1>
-    <p class="hero-sub hero-seq s3">Building atmospheric multiplayer survival games independently, from the ground up.</p>
+    <p class="hero-sub hero-seq s3" data-i18n="hero-sub">Building atmospheric multiplayer survival games independently, from the ground up.</p>
     <div class="btn-row hero-seq s4">
-      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn btn-solid">▶ &nbsp;YouTube Channel</a>
-      <a href="#games" class="btn btn-ghost">↓ &nbsp;Our Games</a>
+      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn btn-solid" data-i18n="hero-yt">▶ &nbsp;YouTube Channel</a>
+      <a href="#games" class="btn btn-ghost" data-i18n="hero-games">↓ &nbsp;Our Games</a>
     </div>
   </div>
-  <div class="scroll-hint">Scroll</div>
+  <div class="scroll-hint" data-i18n="scroll">Scroll</div>
 </header>
 
 <!-- ══ HAZARD TAPE ══ -->
 <div class="tape" aria-hidden="true">
   <div class="tape-inner">
-    <div class="tape-track" id="tape-track">
+    <div class="tape-track" id="tape-track" data-i18n="tape">
       <span>Survive <b>//</b></span><span>Craft <b>//</b></span><span>Build <b>//</b></span><span>Explore <b>//</b></span><span>Multiplayer <b>//</b></span><span>Unreal Engine 5 <b>//</b></span><span>PC <b>//</b></span><span>Nintendo Switch <b>//</b></span><span>PlayStation <b>//</b></span><span>Xbox <b>//</b></span>
     </div>
   </div>
@@ -658,29 +677,30 @@ footer {
   <div class="wrap">
     <div class="section-head rv">
       <div>
-        <p class="sec-ref">SECTION 01 / FIELD DOSSIERS</p>
-        <h2 class="section-title">Our Titles</h2>
+        <p class="sec-ref" data-i18n="sec1-ref">SECTION 01 / FIELD DOSSIERS</p>
+        <h2 class="section-title" data-i18n="sec1-title">Our Titles</h2>
       </div>
-      <p class="sec-note">Classification: Public<br>Issued by Wobbly Tooth</p>
+      <p class="sec-note" data-i18n="sec1-note">Classification: Public<br>Issued by Wobbly Tooth</p>
     </div>
 
     <!-- RAIN STATION Z -->
     <article class="dossier rv">
       <div class="dossier-head">
-        <span class="dossier-id">Dossier <b>RSZ-01</b> // Rain Station Z</span>
-        <span class="stamp incoming slam">Incoming</span>
+        <span class="dossier-id" data-i18n="rsz-id">Dossier <b>RSZ-01</b> // Rain Station Z</span>
+        <span class="stamp deployed slam" data-i18n="stamp-deployed">Deployed</span>
       </div>
       <div class="dossier-body">
         <div>
           <h3 class="game-name">Rain Station Z</h3>
-          <p class="spec-row">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch &nbsp;·&nbsp; Mode: Multiplayer</p>
-          <p class="game-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC and Nintendo Switch.</p>
+          <p class="spec-row" data-i18n="rsz-spec">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch &nbsp;·&nbsp; Mode: Multiplayer</p>
+          <p class="game-desc" data-i18n="rsz-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC and Nintendo Switch.</p>
           <div class="store-row">
-            <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn outline">Wishlist on Steam ↗</a>
+            <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn outline" data-i18n="rsz-buy">Buy on Steam ↗</a>
+            <a href="RainStationZ/" class="store-btn outline" id="handbook-link" data-i18n="rsz-handbook">Survival Handbook</a>
           </div>
         </div>
         <div class="photo">
-          <span class="note" style="top:-46px; right:-6px;">wishlist this one!!
+          <span class="note" style="top:-46px; right:-6px;"><span data-i18n="rsz-note">out now on Steam!!</span>
             <svg width="60" height="34" viewBox="0 0 60 34" fill="none"><path d="M8 2 C 20 26, 38 30, 52 22 M52 22 l-10 -2 m10 2 l-4 9" stroke="#c8f53d" stroke-width="2.4" stroke-linecap="round"/></svg>
           </span>
           <div class="photo-frame">
@@ -688,7 +708,7 @@ footer {
               <img src="https://img.youtube.com/vi/t-pXFw6_LJQ/hqdefault.jpg" alt="Rain Station Z" loading="lazy">
               <div class="play"><div class="ring">▶</div></div>
             </div>
-            <div class="photo-cap"><span>Fig. 1 — Field footage</span><span>RSZ / 2026</span></div>
+            <div class="photo-cap"><span data-i18n="cap-fig1">Fig. 1 — Field footage</span><span>RSZ / 2026</span></div>
           </div>
         </div>
       </div>
@@ -697,14 +717,14 @@ footer {
     <!-- ICE STATION Z -->
     <article class="dossier rv">
       <div class="dossier-head">
-        <span class="dossier-id">Dossier <b>ISZ-02</b> // Ice Station Z</span>
-        <span class="stamp deployed slam">Deployed</span>
+        <span class="dossier-id" data-i18n="isz-id">Dossier <b>ISZ-02</b> // Ice Station Z</span>
+        <span class="stamp deployed slam" data-i18n="stamp-deployed">Deployed</span>
       </div>
       <div class="dossier-body">
         <div>
           <h3 class="game-name">Ice Station Z</h3>
-          <p class="spec-row">Region: Arctic &nbsp;·&nbsp; Platforms: Switch / PC / PS &nbsp;·&nbsp; Companion: Husky</p>
-          <p class="game-desc">A zombie survival game set in a frozen arctic wasteland. Find weapons, ammo, food and shelter, befriend your husky companion and fight to survive against the undead available now on Nintendo Switch and PC.</p>
+          <p class="spec-row" data-i18n="isz-spec">Region: Arctic &nbsp;·&nbsp; Platforms: Switch / PC / PS &nbsp;·&nbsp; Companion: Husky</p>
+          <p class="game-desc" data-i18n="isz-desc">A zombie survival game set in a frozen arctic wasteland. Find weapons, ammo, food and shelter, befriend your husky companion and fight to survive against the undead available now on Nintendo Switch and PC.</p>
           <div class="store-row">
             <a href="https://www.nintendo.com/games/detail/ice-station-z-switch/" target="_blank" class="store-btn solid">Nintendo Switch</a>
             <a href="https://store.steampowered.com/app/1795180/Ice_Station_Z" target="_blank" class="store-btn outline">Steam ↗</a>
@@ -717,7 +737,7 @@ footer {
               <img src="https://img.youtube.com/vi/DVFfcqbeVbc/hqdefault.jpg" alt="Ice Station Z" loading="lazy">
               <div class="play"><div class="ring">▶</div></div>
             </div>
-            <div class="photo-cap"><span>Fig. 2 — Field footage</span><span>ISZ</span></div>
+            <div class="photo-cap"><span data-i18n="cap-fig2">Fig. 2 — Field footage</span><span>ISZ</span></div>
           </div>
         </div>
       </div>
@@ -726,14 +746,14 @@ footer {
     <!-- BATTLEMINER GIANTS -->
     <article class="dossier rv">
       <div class="dossier-head">
-        <span class="dossier-id">Dossier <b>BMG-03</b> // Battleminer Giants</span>
-        <span class="stamp deployed slam">Deployed</span>
+        <span class="dossier-id" data-i18n="bmg-id">Dossier <b>BMG-03</b> // Battleminer Giants</span>
+        <span class="stamp deployed slam" data-i18n="stamp-deployed2">Deployed</span>
       </div>
       <div class="dossier-body">
         <div>
           <h3 class="game-name">Battleminer Giants</h3>
-          <p class="spec-row">World: Voxel / Celtic &nbsp;·&nbsp; Platforms: Xbox / Switch / PS &nbsp;·&nbsp; Threat: Giants</p>
-          <p class="game-desc">A voxel open world Celtic fantasy adventure from the creator of BattleminerZ. Towering giants roam the land shaping the fate of kingdoms forge alliances, battle colossal enemies, craft, build and uncover ancient secrets hidden across vast block-built landscapes.</p>
+          <p class="spec-row" data-i18n="bmg-spec">World: Voxel / Celtic &nbsp;·&nbsp; Platforms: Xbox / Switch / PS &nbsp;·&nbsp; Threat: Giants</p>
+          <p class="game-desc" data-i18n="bmg-desc">A voxel open world Celtic fantasy adventure from the creator of BattleminerZ. Towering giants roam the land shaping the fate of kingdoms forge alliances, battle colossal enemies, craft, build and uncover ancient secrets hidden across vast block-built landscapes.</p>
           <div class="store-row">
             <a href="https://www.xbox.com/en-GB/games/store/battleminer-giants/9nl7z9sx6bzb" target="_blank" class="store-btn solid">Xbox Series X|S</a>
             <a href="https://www.nintendo.com/en-gb/Games/Nintendo-Switch-download-software/Battleminer-Giants-2691201.html" target="_blank" class="store-btn outline">Nintendo Switch ↗</a>
@@ -746,7 +766,7 @@ footer {
               <img src="https://img.youtube.com/vi/LQaNQeVvVuQ/hqdefault.jpg" alt="Battleminer Giants" loading="lazy">
               <div class="play"><div class="ring">&#9658;</div></div>
             </div>
-            <div class="photo-cap"><span>Fig. 3 — Field footage</span><span>BMG</span></div>
+            <div class="photo-cap"><span data-i18n="cap-fig3">Fig. 3 — Field footage</span><span>BMG</span></div>
           </div>
         </div>
       </div>
@@ -760,14 +780,14 @@ footer {
   <div class="wrap">
     <div class="section-head rv">
       <div>
-        <p class="sec-ref">SECTION 02 / ARCHIVE FOOTAGE</p>
-        <h2 class="section-title">Videos</h2>
+        <p class="sec-ref" data-i18n="sec2-ref">SECTION 02 / ARCHIVE FOOTAGE</p>
+        <h2 class="section-title" data-i18n="sec2-title">Videos</h2>
       </div>
-      <p class="sec-note">Devlogs &amp; trailers<br>Recovered media</p>
+      <p class="sec-note" data-i18n="sec2-note">Devlogs &amp; trailers<br>Recovered media</p>
     </div>
     <div class="vgrid" id="video-grid"></div>
     <div class="more-row rv">
-      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn btn-ghost">More on YouTube ↗</a>
+      <a href="https://www.youtube.com/@wobblytoothgames" target="_blank" class="btn btn-ghost" data-i18n="more-yt">More on YouTube ↗</a>
     </div>
   </div>
 </section>
@@ -787,11 +807,82 @@ footer {
   </div>
   <p class="foot-copy">
     <span>© 2026 Wobbly Tooth. All rights reserved.</span>
-    <span>END OF TRANSMISSION // WT-26</span>
+    <span data-i18n="foot-end">END OF TRANSMISSION // WT-26</span>
   </p>
 </footer>
 
 <script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LANGUAGE (EN / 日本語)
+   Pick order: ?lang= in the URL (and remember it) →
+   remembered choice → browser language. The manual under
+   /RainStationZ/ uses the same scheme.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+var WT_LANG = (function() {
+  var url = new URLSearchParams(location.search).get('lang');
+  var lang = (url === 'ja' || url === 'en') ? url : null;
+  try {
+    if (lang) { localStorage.setItem('wt-lang', lang); }
+    else { lang = localStorage.getItem('wt-lang') || localStorage.getItem('rsz-lang'); }
+  } catch (e) { /* private mode */ }
+  if (lang !== 'ja' && lang !== 'en') {
+    var prefs = navigator.languages || [navigator.language || ''];
+    lang = prefs.some(function(l) { return (l || '').toLowerCase().indexOf('ja') === 0; }) ? 'ja' : 'en';
+  }
+  return lang === 'ja' ? 'ja' : 'en';
+})();
+
+var WT_JA = {
+  'nav-games': 'ゲーム',
+  'nav-videos': '動画',
+  'hero-sub': '雰囲気を大切にしたマルチプレイヤーサバイバルゲームを、ゼロから独りで作っています。',
+  'hero-yt': '▶ &nbsp;YouTubeチャンネル',
+  'hero-games': '↓ &nbsp;ゲーム一覧',
+  'scroll': 'スクロール',
+  'tape': '<span>生き延びろ <b>//</b></span><span>クラフト <b>//</b></span><span>建築 <b>//</b></span><span>探索 <b>//</b></span><span>マルチプレイヤー <b>//</b></span><span>Unreal Engine 5 <b>//</b></span><span>PC <b>//</b></span><span>Nintendo Switch <b>//</b></span><span>PlayStation <b>//</b></span><span>Xbox <b>//</b></span>',
+  'sec1-ref': 'セクション01 / フィールド調書',
+  'sec1-title': '開発タイトル',
+  'sec1-note': '区分：公開<br>発行：Wobbly Tooth',
+  'rsz-id': '調書 <b>RSZ-01</b> // Rain Station Z',
+  'rsz-spec': 'エンジン：Unreal 5 &nbsp;·&nbsp; 対応機種：PC / Switch &nbsp;·&nbsp; モード：マルチプレイヤー',
+  'rsz-desc': '終末後の世界を舞台にしたマルチプレイヤーサバイバルゲーム。物資は乏しく、あらゆる選択が重みを持つ世界で、感染者に立ち向かうために力を合わせよう。Unreal Engine 5で開発。PC・Nintendo Switch向け。',
+  'rsz-buy': 'Steamで購入 ↗',
+  'rsz-handbook': 'サバイバルハンドブック',
+  'rsz-note': 'Steamで好評配信中!!',
+  'cap-fig1': '図1 ― 現地映像',
+  'isz-id': '調書 <b>ISZ-02</b> // Ice Station Z',
+  'stamp-deployed': '配信中',
+  'stamp-deployed2': '配信中',
+  'isz-spec': '地域：北極圏 &nbsp;·&nbsp; 対応機種：Switch / PC / PS &nbsp;·&nbsp; 相棒：ハスキー',
+  'isz-desc': '凍てついた北極の荒野を舞台にしたゾンビサバイバルゲーム。武器・弾薬・食料・シェルターを見つけ、ハスキーの相棒と絆を深め、アンデッドとの生存競争を生き抜こう。Nintendo SwitchとPCで配信中。',
+  'cap-fig2': '図2 ― 現地映像',
+  'bmg-id': '調書 <b>BMG-03</b> // Battleminer Giants',
+  'bmg-spec': '世界：ボクセル／ケルト &nbsp;·&nbsp; 対応機種：Xbox / Switch / PS &nbsp;·&nbsp; 脅威：巨人',
+  'bmg-desc': 'BattleminerZの開発者が贈る、ボクセルオープンワールドのケルト幻想アドベンチャー。そびえ立つ巨人が大地を歩き、王国の運命を左右する。同盟を結び、巨大な敵と戦い、クラフトと建築を駆使して、ブロックで築かれた広大な大地に眠る古代の秘密を解き明かそう。',
+  'cap-fig3': '図3 ― 現地映像',
+  'sec2-ref': 'セクション02 / アーカイブ映像',
+  'sec2-title': '動画',
+  'sec2-note': '開発記録とトレーラー<br>回収されたメディア',
+  'more-yt': 'もっと見る（YouTube）↗',
+  'foot-end': '通信終了 // WT-26'
+};
+
+if (WT_LANG === 'ja')
+{
+  document.documentElement.lang = 'ja';
+  document.title = 'Wobbly Tooth ― インディーゲーム開発';
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) { metaDesc.content = 'ソロのインディーゲーム開発者。雰囲気を大切にしたマルチプレイヤーサバイバルゲームを制作しています。'; }
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var t = WT_JA[el.dataset.i18n];
+    if (t) { el.innerHTML = t; }
+  });
+  var hb = document.getElementById('handbook-link');
+  if (hb) { hb.href = 'RainStationZ/?lang=ja'; }
+}
+var activeLang = document.getElementById('lang-' + WT_LANG);
+if (activeLang) { activeLang.classList.add('on'); }
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    YOUR FEATURED VIDEOS
    Add or remove YouTube video IDs from this list
@@ -817,7 +908,7 @@ myVideos.forEach(function(id, i) {
         '<img src="https://img.youtube.com/vi/' + id + '/hqdefault.jpg" loading="lazy">' +
         '<div class="play"><div class="ring">&#9658;</div></div>' +
       '</div>' +
-      '<div class="photo-cap"><span>Frame ' + num + '</span><span>Archive</span></div>' +
+      '<div class="photo-cap"><span>' + (WT_LANG === 'ja' ? 'フレーム ' : 'Frame ') + num + '</span><span>' + (WT_LANG === 'ja' ? 'アーカイブ' : 'Archive') + '</span></div>' +
     '</div>';
   grid.appendChild(frame);
 });
@@ -839,7 +930,9 @@ var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 /* ━━━ Typewriter on the transmission line ━━━ */
 (function() {
   var target = document.getElementById('typed');
-  var text = 'INCOMING TRANSMISSION // SOLO INDIE GAME DEVELOPER';
+  var text = WT_LANG === 'ja'
+    ? '受信中 // ソロ・インディーゲーム開発者'
+    : 'INCOMING TRANSMISSION // SOLO INDIE GAME DEVELOPER';
 
   if (reduceMotion)
   {
