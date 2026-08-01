@@ -1163,6 +1163,20 @@ tapeTrack.innerHTML += tapeTrack.innerHTML;
 
   requestAnimationFrame(frame);
 })();
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THE DOT
+   Hidden entrance to the Eventide build. Added from
+   script so there is no crawlable link in the markup.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+(function() {
+  var dot = document.querySelector('.foot-logo span');
+  if (!dot) { return; }
+  dot.style.cursor = 'pointer';
+  dot.addEventListener('click', function() {
+    window.location.href = 'eventide/';
+  });
+})();
 </script>
 </body>
 </html>
