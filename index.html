@@ -695,12 +695,13 @@ footer {
           <p class="spec-row" data-i18n="rsz-spec">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch &nbsp;·&nbsp; Mode: Multiplayer</p>
           <p class="game-desc" data-i18n="rsz-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC and Nintendo Switch.</p>
           <div class="store-row">
-            <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn outline" data-i18n="rsz-buy">Buy on Steam ↗</a>
+            <a href="https://www.nintendo.com/us/store/products/rain-station-z-switch/" target="_blank" class="store-btn solid" id="rsz-switch-link" data-i18n="rsz-buy">Buy on Nintendo Switch ↗</a>
+            <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn outline" data-i18n="rsz-steam">Steam ↗</a>
             <a href="rainstationz/" class="store-btn outline" id="handbook-link" data-i18n="rsz-handbook">Survival Handbook</a>
           </div>
         </div>
         <div class="photo">
-          <span class="note" style="top:-46px; right:-6px;"><span data-i18n="rsz-note">out now on Steam!!</span>
+          <span class="note" style="top:-46px; right:-6px;"><span data-i18n="rsz-note">out now on Switch!</span>
             <svg width="60" height="34" viewBox="0 0 60 34" fill="none"><path d="M8 2 C 20 26, 38 30, 52 22 M52 22 l-10 -2 m10 2 l-4 9" stroke="#c8f53d" stroke-width="2.4" stroke-linecap="round"/></svg>
           </span>
           <div class="photo-frame">
@@ -846,9 +847,10 @@ var WT_JA = {
   'rsz-id': '調書 <b>RSZ-01</b> // Rain Station Z',
   'rsz-spec': 'エンジン：Unreal 5 &nbsp;·&nbsp; 対応機種：PC / Switch &nbsp;·&nbsp; モード：マルチプレイヤー',
   'rsz-desc': '終末後の世界を舞台にしたマルチプレイヤーサバイバルゲーム。物資は乏しく、あらゆる選択が重みを持つ世界で、感染者に立ち向かうために力を合わせよう。Unreal Engine 5で開発。PC・Nintendo Switch向け。',
-  'rsz-buy': 'Steamで購入 ↗',
+  'rsz-buy': 'ニンテンドーeショップで購入 ↗',
+  'rsz-steam': 'Steamで購入 ↗',
   'rsz-handbook': 'サバイバルハンドブック',
-  'rsz-note': 'Steamで好評配信中!!',
+  'rsz-note': 'Switchで好評配信中!',
   'cap-fig1': '図1 ― 現地映像',
   'isz-id': '調書 <b>ISZ-02</b> // Ice Station Z',
   'stamp-deployed': '配信中',
@@ -879,6 +881,9 @@ if (WT_LANG === 'ja')
   });
   var hb = document.getElementById('handbook-link');
   if (hb) { hb.href = 'rainstationz/?lang=ja'; }
+  // JP eShop has its own NSUID, so the store link is not just a locale swap
+  var sw = document.getElementById('rsz-switch-link');
+  if (sw) { sw.href = 'https://store-jp.nintendo.com/item/software/D70010000119163'; }
 }
 var activeLang = document.getElementById('lang-' + WT_LANG);
 if (activeLang) { activeLang.classList.add('on'); }
