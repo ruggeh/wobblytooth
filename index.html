@@ -692,10 +692,11 @@ footer {
       <div class="dossier-body">
         <div>
           <h3 class="game-name">Rain Station Z</h3>
-          <p class="spec-row" data-i18n="rsz-spec">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch &nbsp;·&nbsp; Mode: Multiplayer</p>
-          <p class="game-desc" data-i18n="rsz-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC and Nintendo Switch.</p>
+          <p class="spec-row" data-i18n="rsz-spec">Engine: Unreal 5 &nbsp;·&nbsp; Platforms: PC / Switch / PS5 &nbsp;·&nbsp; Mode: Multiplayer</p>
+          <p class="game-desc" data-i18n="rsz-desc">A post-apocalyptic multiplayer survival game. Band together against the infected in a world where resources are scarce and every decision carries weight built in Unreal Engine 5 for PC, Nintendo Switch and PlayStation 5.</p>
           <div class="store-row">
             <a href="https://www.nintendo.com/us/store/products/rain-station-z-switch/" target="_blank" class="store-btn solid" id="rsz-switch-link" data-i18n="rsz-buy">Buy on Nintendo Switch ↗</a>
+            <a href="https://store.playstation.com/en-gb/product/EP3644-PPSA39661_00-0000000000000000" target="_blank" class="store-btn outline" id="rsz-ps-link" data-i18n="rsz-ps">PlayStation ↗</a>
             <a href="https://store.steampowered.com/app/4781990/Rain_Station_Z/" target="_blank" class="store-btn outline" data-i18n="rsz-steam">Steam ↗</a>
             <a href="rainstationz/" class="store-btn outline" id="handbook-link" data-i18n="rsz-handbook">Survival Handbook</a>
           </div>
@@ -845,9 +846,10 @@ var WT_JA = {
   'sec1-title': '開発タイトル',
   'sec1-note': '区分：公開<br>発行：Wobbly Tooth',
   'rsz-id': '調書 <b>RSZ-01</b> // Rain Station Z',
-  'rsz-spec': 'エンジン：Unreal 5 &nbsp;·&nbsp; 対応機種：PC / Switch &nbsp;·&nbsp; モード：マルチプレイヤー',
-  'rsz-desc': '終末後の世界を舞台にしたマルチプレイヤーサバイバルゲーム。物資は乏しく、あらゆる選択が重みを持つ世界で、感染者に立ち向かうために力を合わせよう。Unreal Engine 5で開発。PC・Nintendo Switch向け。',
+  'rsz-spec': 'エンジン：Unreal 5 &nbsp;·&nbsp; 対応機種：PC / Switch / PS5 &nbsp;·&nbsp; モード：マルチプレイヤー',
+  'rsz-desc': '終末後の世界を舞台にしたマルチプレイヤーサバイバルゲーム。物資は乏しく、あらゆる選択が重みを持つ世界で、感染者に立ち向かうために力を合わせよう。Unreal Engine 5で開発。PC・Nintendo Switch・PlayStation 5向け。',
   'rsz-buy': 'ニンテンドーeショップで購入 ↗',
+  'rsz-ps': 'PS Storeで購入 ↗',
   'rsz-steam': 'Steamで購入 ↗',
   'rsz-handbook': 'サバイバルハンドブック',
   'rsz-note': 'Switchで好評配信中!',
@@ -884,6 +886,8 @@ if (WT_LANG === 'ja')
   // JP eShop has its own NSUID, so the store link is not just a locale swap
   var sw = document.getElementById('rsz-switch-link');
   if (sw) { sw.href = 'https://store-jp.nintendo.com/item/software/D70010000119163'; }
+  var ps = document.getElementById('rsz-ps-link');
+  if (ps) { ps.href = 'https://store.playstation.com/ja-jp/product/EP3644-PPSA39661_00-0000000000000000'; }
 }
 var activeLang = document.getElementById('lang-' + WT_LANG);
 if (activeLang) { activeLang.classList.add('on'); }
