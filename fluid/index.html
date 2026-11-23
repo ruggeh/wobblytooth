@@ -17,6 +17,7 @@
         align-items: center;
         width: 100vw;
         height: 100vh;
+        height: 100dvh;
         overscroll-behavior: none;
     }
     canvas
@@ -27,8 +28,6 @@
     #nextButton
     {
         position: fixed;
-        right: 16px;
-        bottom: 16px;
         width: 44px;
         height: 44px;
         padding: 10px;
@@ -140,6 +139,19 @@ const ctx = canvas.getContext('2d');
 let backgroundImage = new Image();
 let imageLoaded = false;
 
+// One pixel per fluid cell; stretched over the picture each frame with smoothing off.
+const inkCanvas = document.createElement('canvas');
+inkCanvas.width = N + 2;
+inkCanvas.height = N + 2;
+const inkCtx = inkCanvas.getContext('2d');
+const inkData = inkCtx.createImageData(N + 2, N + 2);
+for (let k = 0; k < inkData.data.length; k += 4)
+{
+    inkData.data[k] = 10;
+    inkData.data[k + 1] = 10;
+    inkData.data[k + 2] = 25;
+}
+
 class FluidSquare
 {
     constructor(size, diffusion, viscosity, dt)
@@ -205,18 +217,16 @@ class FluidSquare
             return;
         }
         drawImageCover(ctx, bgImage);
-        for (let j = 0; j <= this.size + 1; j++)
+        const pixels = inkData.data;
+        const count = this.density.length;
+        for (let k = 0; k < count; k++)
         {
-            for (let i = 0; i <= this.size + 1; i++)
-            {
-                let d = this.density[this.IX(i, j)];
-                d = Math.max(0, Math.min(d, 1));
-                ctx.fillStyle = `rgba(10, 10, 25, ${1 - d * 0.98})`;
-                const x0 = Math.floor(i * SCALE);
-                const y0 = Math.floor(j * SCALE);
-                ctx.fillRect(x0, y0, Math.floor((i + 1) * SCALE) - x0, Math.floor((j + 1) * SCALE) - y0);
-            }
+            const d = Math.max(0, Math.min(this.density[k], 1));
+            pixels[k * 4 + 3] = (1 - d * 0.98) * 255;
         }
+        inkCtx.putImageData(inkData, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(inkCanvas, 0, 0, canvas.width, canvas.height);
     }
 
     reset()
@@ -256,23 +266,37 @@ function IX_solver(x, y, N_grid)
     return x + y * (N_grid + 2);
 }
 
+// Weak diffusion converges in a few passes and none at all needs one; only strong diffusion gets the full count.
 function diffuse(b, x, x0, diff_rate, dt, iter, N_grid)
 {
     let a = dt * diff_rate * N_grid * N_grid;
-    lin_solve(b, x, x0, a, 1 + 4 * a, iter, N_grid);
+    let passes = iter;
+    if (a === 0)
+    {
+        passes = 1;
+    }
+    else if (a < 0.1)
+    {
+        passes = Math.min(iter, 4);
+    }
+    lin_solve(b, x, x0, a, 1 + 4 * a, passes, N_grid);
 }
 
+// Hot loops index the arrays directly (i + j * W); every index here is already in range, so IX_solver's clamping isn't needed.
 function lin_solve(b, x, x0, a, c, iter, N_grid)
 {
-    let cRecip = 1.0 / c;
+    const W = N_grid + 2;
+    const cRecip = 1.0 / c;
     for (let k = 0; k < iter; k++)
     {
         for (let j = 1; j <= N_grid; j++)
         {
+            let idx = 1 + j * W;
             for (let i = 1; i <= N_grid; i++)
             {
-                const neighbours = x[IX_solver(i + 1, j, N_grid)] + x[IX_solver(i - 1, j, N_grid)] + x[IX_solver(i, j + 1, N_grid)] + x[IX_solver(i, j - 1, N_grid)];
-                x[IX_solver(i, j, N_grid)] = (x0[IX_solver(i, j, N_grid)] + a * neighbours) * cRecip;
+                const neighbours = x[idx + 1] + x[idx - 1] + x[idx + W] + x[idx - W];
+                x[idx] = (x0[idx] + a * neighbours) * cRecip;
+                idx++;
             }
         }
         set_bnd(b, x, N_grid);
@@ -281,14 +305,17 @@ function lin_solve(b, x, x0, a, c, iter, N_grid)
 
 function project(velocX, velocY, p, div, iter, N_grid)
 {
+    const W = N_grid + 2;
     for (let j = 1; j <= N_grid; j++)
     {
+        let idx = 1 + j * W;
         for (let i = 1; i <= N_grid; i++)
         {
-            const dvx = velocX[IX_solver(i + 1, j, N_grid)] - velocX[IX_solver(i - 1, j, N_grid)];
-            const dvy = velocY[IX_solver(i, j + 1, N_grid)] - velocY[IX_solver(i, j - 1, N_grid)];
-            div[IX_solver(i, j, N_grid)] = -0.5 * (dvx + dvy) / N_grid;
-            p[IX_solver(i, j, N_grid)] = 0;
+            const dvx = velocX[idx + 1] - velocX[idx - 1];
+            const dvy = velocY[idx + W] - velocY[idx - W];
+            div[idx] = -0.5 * (dvx + dvy) / N_grid;
+            p[idx] = 0;
+            idx++;
         }
     }
     set_bnd(0, div, N_grid);
@@ -296,10 +323,12 @@ function project(velocX, velocY, p, div, iter, N_grid)
     lin_solve(0, p, div, 1, 4, iter, N_grid);
     for (let j = 1; j <= N_grid; j++)
     {
+        let idx = 1 + j * W;
         for (let i = 1; i <= N_grid; i++)
         {
-            velocX[IX_solver(i, j, N_grid)] -= 0.5 * (p[IX_solver(i + 1, j, N_grid)] - p[IX_solver(i - 1, j, N_grid)]) * N_grid;
-            velocY[IX_solver(i, j, N_grid)] -= 0.5 * (p[IX_solver(i, j + 1, N_grid)] - p[IX_solver(i, j - 1, N_grid)]) * N_grid;
+            velocX[idx] -= 0.5 * (p[idx + 1] - p[idx - 1]) * N_grid;
+            velocY[idx] -= 0.5 * (p[idx + W] - p[idx - W]) * N_grid;
+            idx++;
         }
     }
     set_bnd(1, velocX, N_grid);
@@ -308,14 +337,16 @@ function project(velocX, velocY, p, div, iter, N_grid)
 
 function advect(b, d, d0, velocX, velocY, dt, N_grid)
 {
+    const W = N_grid + 2;
     let i0, i1, j0, j1;
     let dt0 = dt * N_grid;
     for (let j = 1; j <= N_grid; j++)
     {
         for (let i = 1; i <= N_grid; i++)
         {
-            let tmp1 = dt0 * velocX[IX_solver(i, j, N_grid)];
-            let tmp2 = dt0 * velocY[IX_solver(i, j, N_grid)];
+            const idx = i + j * W;
+            let tmp1 = dt0 * velocX[idx];
+            let tmp2 = dt0 * velocY[idx];
             let x = i - tmp1;
             let y = j - tmp2;
             if (x < 0.5)
@@ -342,9 +373,9 @@ function advect(b, d, d0, velocX, velocY, dt, N_grid)
             let s0 = 1.0 - s1;
             let t1 = y - j0;
             let t0 = 1.0 - t1;
-            const left = t0 * d0[IX_solver(i0, j0, N_grid)] + t1 * d0[IX_solver(i0, j1, N_grid)];
-            const right = t0 * d0[IX_solver(i1, j0, N_grid)] + t1 * d0[IX_solver(i1, j1, N_grid)];
-            d[IX_solver(i, j, N_grid)] = s0 * left + s1 * right;
+            const left = t0 * d0[i0 + j0 * W] + t1 * d0[i0 + j1 * W];
+            const right = t0 * d0[i1 + j0 * W] + t1 * d0[i1 + j1 * W];
+            d[idx] = s0 * left + s1 * right;
         }
     }
     set_bnd(b, d, N_grid);
@@ -493,12 +524,6 @@ canvas.addEventListener('dblclick', () =>
     nextScreenshot();
 });
 
-const DOUBLE_TAP_MS = 300;
-const DOUBLE_TAP_PX = 40;
-let lastTapTime = 0;
-let lastTapX = 0;
-let lastTapY = 0;
-
 canvas.addEventListener('touchstart', e =>
 {
     e.preventDefault();
@@ -506,16 +531,6 @@ canvas.addEventListener('touchstart', e =>
     {
         touchIsActive = true;
         const pos = getEventPos(canvas, e);
-        const now = performance.now();
-        if (now - lastTapTime < DOUBLE_TAP_MS && Math.hypot(pos.x - lastTapX, pos.y - lastTapY) < DOUBLE_TAP_PX)
-        {
-            lastTapTime = 0;
-            nextScreenshot();
-            return;
-        }
-        lastTapTime = now;
-        lastTapX = pos.x;
-        lastTapY = pos.y;
         pressAt(pos);
         lastTouchX = pos.x;
         lastTouchY = pos.y;
@@ -561,6 +576,17 @@ function setupCanvas()
     SCALE = Math.max(newScale, 0.1);
     canvas.width = (N + 2) * SCALE;
     canvas.height = (N + 2) * SCALE;
+    placeNextButton();
+}
+
+// Sits just inside the picture's bottom-right corner rather than the window's.
+function placeNextButton()
+{
+    const BUTTON_INSET = 8;
+    const rect = canvas.getBoundingClientRect();
+    const button = document.getElementById('nextButton');
+    button.style.left = (rect.right - button.offsetWidth - BUTTON_INSET) + 'px';
+    button.style.top = (rect.bottom - button.offsetHeight - BUTTON_INSET) + 'px';
 }
 
 let currentShot = -1;
