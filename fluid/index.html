@@ -24,11 +24,41 @@
         display: block;
         touch-action: none;
     }
+    #nextButton
+    {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        width: 44px;
+        height: 44px;
+        padding: 10px;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        cursor: pointer;
+        opacity: 0.12;
+        transition: opacity 0.6s;
+        touch-action: manipulation;
+    }
+    #nextButton.awake
+    {
+        opacity: 0.6;
+        transition: opacity 0.15s;
+    }
+    #nextButton:hover
+    {
+        opacity: 1;
+    }
 </style>
 </head>
 <body>
 
 <canvas id="fluidCanvas"></canvas>
+<button id="nextButton" title="Another picture" aria-label="Another picture">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+</button>
 
 <script>
 // Add more game screenshots here; one is picked at random on each visit.
@@ -458,6 +488,17 @@ canvas.addEventListener('mouseenter', e =>
     mouseIsDown = (e.buttons === 1);
 });
 
+canvas.addEventListener('dblclick', () =>
+{
+    nextScreenshot();
+});
+
+const DOUBLE_TAP_MS = 300;
+const DOUBLE_TAP_PX = 40;
+let lastTapTime = 0;
+let lastTapX = 0;
+let lastTapY = 0;
+
 canvas.addEventListener('touchstart', e =>
 {
     e.preventDefault();
@@ -465,6 +506,16 @@ canvas.addEventListener('touchstart', e =>
     {
         touchIsActive = true;
         const pos = getEventPos(canvas, e);
+        const now = performance.now();
+        if (now - lastTapTime < DOUBLE_TAP_MS && Math.hypot(pos.x - lastTapX, pos.y - lastTapY) < DOUBLE_TAP_PX)
+        {
+            lastTapTime = 0;
+            nextScreenshot();
+            return;
+        }
+        lastTapTime = now;
+        lastTapX = pos.x;
+        lastTapY = pos.y;
         pressAt(pos);
         lastTouchX = pos.x;
         lastTouchY = pos.y;
@@ -512,12 +563,68 @@ function setupCanvas()
     canvas.height = (N + 2) * SCALE;
 }
 
+let currentShot = -1;
+let nextLoading = false;
+
+function pickShot()
+{
+    let index = Math.floor(Math.random() * SCREENSHOTS.length);
+    if (SCREENSHOTS.length > 1 && index === currentShot)
+    {
+        index = (index + 1) % SCREENSHOTS.length;
+    }
+    currentShot = index;
+    return SCREENSHOTS[index];
+}
+
 function loadRandomScreenshot()
 {
     imageLoaded = false;
-    const index = Math.floor(Math.random() * SCREENSHOTS.length);
-    backgroundImage.src = SCREENSHOTS[index];
+    backgroundImage.src = pickShot();
 }
+
+// Loads off to the side and swaps once ready, so there is no black flash between pictures.
+function nextScreenshot()
+{
+    if (nextLoading)
+    {
+        return;
+    }
+    nextLoading = true;
+    const img = new Image();
+    img.onload = () =>
+    {
+        backgroundImage = img;
+        fluid.reset();
+        nextLoading = false;
+    };
+    img.onerror = () =>
+    {
+        nextLoading = false;
+    };
+    img.src = pickShot();
+}
+
+const nextButton = document.getElementById('nextButton');
+let wakeTimeout;
+
+nextButton.addEventListener('click', () =>
+{
+    nextScreenshot();
+});
+
+function wakeButton()
+{
+    nextButton.classList.add('awake');
+    clearTimeout(wakeTimeout);
+    wakeTimeout = setTimeout(() =>
+    {
+        nextButton.classList.remove('awake');
+    }, 2500);
+}
+
+window.addEventListener('mousemove', wakeButton);
+window.addEventListener('touchstart', wakeButton, { passive: true });
 
 backgroundImage.onload = () =>
 {
