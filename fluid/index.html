@@ -640,18 +640,35 @@ function placeNextButton()
     button.style.top = (rect.bottom - button.offsetHeight - BUTTON_INSET) + 'px';
 }
 
-let currentShot = -1;
+// Shots grouped by game (file name up to the last underscore) so every game comes up equally often.
+const GAMES = [];
+const gameIndex = {};
+for (const path of SCREENSHOTS)
+{
+    const file = path.substring(path.lastIndexOf('/') + 1);
+    const game = file.substring(0, file.lastIndexOf('_'));
+    if (gameIndex[game] === undefined)
+    {
+        gameIndex[game] = GAMES.length;
+        GAMES.push([]);
+    }
+    GAMES[gameIndex[game]].push(path);
+}
+
+let currentGame = -1;
 let nextLoading = false;
 
+// Never the same game twice in a row, which also rules out repeating the picture.
 function pickShot()
 {
-    let index = Math.floor(Math.random() * SCREENSHOTS.length);
-    if (SCREENSHOTS.length > 1 && index === currentShot)
+    let game = Math.floor(Math.random() * GAMES.length);
+    if (GAMES.length > 1 && game === currentGame)
     {
-        index = (index + 1) % SCREENSHOTS.length;
+        game = (game + 1 + Math.floor(Math.random() * (GAMES.length - 1))) % GAMES.length;
     }
-    currentShot = index;
-    return SCREENSHOTS[index];
+    currentGame = game;
+    const shots = GAMES[game];
+    return shots[Math.floor(Math.random() * shots.length)];
 }
 
 function loadRandomScreenshot()
