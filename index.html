@@ -1181,6 +1181,22 @@ tapeTrack.innerHTML += tapeTrack.innerHTML;
     window.location.href = 'eventide/';
   });
 })();
+
+/* Hidden entrance to the fluid toy: the blinking dot in the header logo. */
+(function()
+{
+  var dot = document.querySelector('.nav-logo span');
+  if (!dot)
+  {
+    return;
+  }
+  dot.addEventListener('click', function(e)
+  {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = 'fluid/';
+  });
+})();
 </script>
 </body>
 </html>

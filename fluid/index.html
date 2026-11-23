@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Wobbly Tooth - Fluid</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<style>
+    body
+    {
+        margin: 0;
+        overflow: hidden;
+        background-color: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        overscroll-behavior: none;
+    }
+    canvas
+    {
+        display: block;
+        touch-action: none;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="fluidCanvas"></canvas>
+
+<script>
+// Add more game screenshots here; one is picked at random on each visit.
+const SCREENSHOTS =
+[
+    'shots/battleminerz_01.jpg',
+    'shots/battleminerz_02.jpg',
+    'shots/battleminerz_03.jpg',
+    'shots/battleminerz_04.jpg',
+    'shots/battleminerz_05.jpg',
+    'shots/stuntbike_01.jpg',
+    'shots/stuntbike_02.jpg',
+    'shots/stuntbike_03.jpg',
+    'shots/stuntbike_04.jpg',
+    'shots/stuntbike_05.jpg',
+    'shots/stuntbike_06.jpg',
+    'shots/voxel_shooter_01.jpg',
+    'shots/voxel_shooter_02.jpg',
+    'shots/voxel_party_01.jpg',
+    'shots/voxel_party_02.jpg',
+    'shots/voxel_party_03.jpg',
+    'shots/icestationz_01.jpg',
+    'shots/icestationz_02.jpg',
+    'shots/icestationz_03.jpg',
+    'shots/icestationz_04.jpg',
+    'shots/icestationz_05.jpg',
+    'shots/icestationz_06.jpg',
+    'shots/icestationz_07.jpg',
+    'shots/icestationz_08.jpg',
+    'shots/rainstationz_01.jpg',
+    'shots/rainstationz_02.jpg',
+    'shots/rainstationz_03.jpg',
+    'shots/rainstationz_04.jpg',
+    'shots/rainstationz_05.jpg',
+    'shots/rainstationz_06.jpg',
+    'shots/rainstationz_07.jpg',
+    'shots/rainstationz_08.jpg',
+    'shots/rainstationz_09.jpg',
+    'shots/rainstationz_10.jpg',
+    'shots/voxel_rpg_01.jpg',
+    'shots/voxel_rpg_02.jpg',
+    'shots/voxel_rpg_03.jpg',
+    'shots/voxel_rpg_04.jpg',
+    'shots/voxel_rpg_05.jpg',
+    'shots/voxel_rpg_06.jpg',
+    'shots/voxel_rpg_07.jpg',
+    'shots/neon_city_01.jpg',
+    'shots/neon_city_02.jpg',
+    'shots/neon_city_03.jpg',
+    'shots/neon_city_04.jpg',
+    'shots/neon_city_05.jpg',
+    'shots/neon_city_06.jpg',
+    'shots/neon_city_07.jpg',
+    'shots/neon_city_08.jpg',
+    'shots/toy_wizard_01.jpg',
+    'shots/toy_wizard_02.jpg',
+    'shots/spider_01.jpg',
+    'shots/spider_02.jpg',
+    'shots/spider_03.jpg',
+    'shots/spider_04.jpg',
+    'shots/gothic_shooter_01.jpg',
+    'shots/gothic_shooter_02.jpg',
+    'shots/gothic_shooter_03.jpg',
+    'shots/gothic_shooter_04.jpg',
+    'shots/avatar_ruins_01.jpg',
+    'shots/avatar_ruins_02.jpg'
+];
+
+let N = 128;
+let SCALE;
+const DT = 0.1;
+const ITER = 20;
+const VISC = 0.00002;
+const DIFF = 0.00000;
+
+const canvas = document.getElementById('fluidCanvas');
+const ctx = canvas.getContext('2d');
+
+let backgroundImage = new Image();
+let imageLoaded = false;
+
+class FluidSquare
+{
+    constructor(size, diffusion, viscosity, dt)
+    {
+        this.size = size;
+        this.dt = dt;
+        this.diff = diffusion;
+        this.visc = viscosity;
+        const arrSize = (size + 2) * (size + 2);
+        this.s = new Float32Array(arrSize).fill(0);
+        this.density = new Float32Array(arrSize).fill(0);
+        this.Vx = new Float32Array(arrSize).fill(0);
+        this.Vy = new Float32Array(arrSize).fill(0);
+        this.Vx0 = new Float32Array(arrSize).fill(0);
+        this.Vy0 = new Float32Array(arrSize).fill(0);
+    }
+
+    IX(x, y)
+    {
+        x = Math.max(0, Math.min(Math.floor(x), this.size + 1));
+        y = Math.max(0, Math.min(Math.floor(y), this.size + 1));
+        return x + y * (this.size + 2);
+    }
+
+    addDensity(x, y, amount)
+    {
+        if (x < 1 || x > this.size || y < 1 || y > this.size)
+        {
+            return;
+        }
+        this.density[this.IX(x, y)] += amount;
+    }
+
+    addVelocity(x, y, amountX, amountY)
+    {
+        if (x < 1 || x > this.size || y < 1 || y > this.size)
+        {
+            return;
+        }
+        let index = this.IX(x, y);
+        this.Vx[index] += amountX;
+        this.Vy[index] += amountY;
+    }
+
+    step()
+    {
+        diffuse(1, this.Vx0, this.Vx, this.visc, this.dt, ITER, this.size);
+        diffuse(2, this.Vy0, this.Vy, this.visc, this.dt, ITER, this.size);
+        project(this.Vx0, this.Vy0, this.Vx, this.Vy, ITER, this.size);
+        advect(1, this.Vx, this.Vx0, this.Vx0, this.Vy0, this.dt, this.size);
+        advect(2, this.Vy, this.Vy0, this.Vx0, this.Vy0, this.dt, this.size);
+        project(this.Vx, this.Vy, this.Vx0, this.Vy0, ITER, this.size);
+        diffuse(0, this.s, this.density, this.diff, this.dt, ITER, this.size);
+        advect(0, this.density, this.s, this.Vx, this.Vy, this.dt, this.size);
+    }
+
+    render(ctx, bgImage)
+    {
+        if (!imageLoaded || !bgImage.complete || bgImage.naturalWidth === 0)
+        {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        drawImageCover(ctx, bgImage);
+        for (let j = 0; j <= this.size + 1; j++)
+        {
+            for (let i = 0; i <= this.size + 1; i++)
+            {
+                let d = this.density[this.IX(i, j)];
+                d = Math.max(0, Math.min(d, 1));
+                ctx.fillStyle = `rgba(10, 10, 25, ${1 - d * 0.98})`;
+                const x0 = Math.floor(i * SCALE);
+                const y0 = Math.floor(j * SCALE);
+                ctx.fillRect(x0, y0, Math.floor((i + 1) * SCALE) - x0, Math.floor((j + 1) * SCALE) - y0);
+            }
+        }
+    }
+
+    reset()
+    {
+        this.s.fill(0);
+        this.density.fill(0);
+        this.Vx.fill(0);
+        this.Vy.fill(0);
+        this.Vx0.fill(0);
+        this.Vy0.fill(0);
+        addInitialDensity(this);
+    }
+}
+
+// Wide shots crop the centre to fill the square; tall ones (3DS dual screen) are shown whole.
+function drawImageCover(ctx, img)
+{
+    const canvasAspect = canvas.width / canvas.height;
+    const imageAspect = img.naturalWidth / img.naturalHeight;
+    if (imageAspect < canvasAspect)
+    {
+        const dw = canvas.height * imageAspect;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, (canvas.width - dw) * 0.5, 0, dw, canvas.height);
+        return;
+    }
+    const sw = img.naturalHeight * canvasAspect;
+    const sx = (img.naturalWidth - sw) * 0.5;
+    ctx.drawImage(img, sx, 0, sw, img.naturalHeight, 0, 0, canvas.width, canvas.height);
+}
+
+function IX_solver(x, y, N_grid)
+{
+    x = Math.max(0, Math.min(Math.floor(x), N_grid + 1));
+    y = Math.max(0, Math.min(Math.floor(y), N_grid + 1));
+    return x + y * (N_grid + 2);
+}
+
+function diffuse(b, x, x0, diff_rate, dt, iter, N_grid)
+{
+    let a = dt * diff_rate * N_grid * N_grid;
+    lin_solve(b, x, x0, a, 1 + 4 * a, iter, N_grid);
+}
+
+function lin_solve(b, x, x0, a, c, iter, N_grid)
+{
+    let cRecip = 1.0 / c;
+    for (let k = 0; k < iter; k++)
+    {
+        for (let j = 1; j <= N_grid; j++)
+        {
+            for (let i = 1; i <= N_grid; i++)
+            {
+                const neighbours = x[IX_solver(i + 1, j, N_grid)] + x[IX_solver(i - 1, j, N_grid)] + x[IX_solver(i, j + 1, N_grid)] + x[IX_solver(i, j - 1, N_grid)];
+                x[IX_solver(i, j, N_grid)] = (x0[IX_solver(i, j, N_grid)] + a * neighbours) * cRecip;
+            }
+        }
+        set_bnd(b, x, N_grid);
+    }
+}
+
+function project(velocX, velocY, p, div, iter, N_grid)
+{
+    for (let j = 1; j <= N_grid; j++)
+    {
+        for (let i = 1; i <= N_grid; i++)
+        {
+            const dvx = velocX[IX_solver(i + 1, j, N_grid)] - velocX[IX_solver(i - 1, j, N_grid)];
+            const dvy = velocY[IX_solver(i, j + 1, N_grid)] - velocY[IX_solver(i, j - 1, N_grid)];
+            div[IX_solver(i, j, N_grid)] = -0.5 * (dvx + dvy) / N_grid;
+            p[IX_solver(i, j, N_grid)] = 0;
+        }
+    }
+    set_bnd(0, div, N_grid);
+    set_bnd(0, p, N_grid);
+    lin_solve(0, p, div, 1, 4, iter, N_grid);
+    for (let j = 1; j <= N_grid; j++)
+    {
+        for (let i = 1; i <= N_grid; i++)
+        {
+            velocX[IX_solver(i, j, N_grid)] -= 0.5 * (p[IX_solver(i + 1, j, N_grid)] - p[IX_solver(i - 1, j, N_grid)]) * N_grid;
+            velocY[IX_solver(i, j, N_grid)] -= 0.5 * (p[IX_solver(i, j + 1, N_grid)] - p[IX_solver(i, j - 1, N_grid)]) * N_grid;
+        }
+    }
+    set_bnd(1, velocX, N_grid);
+    set_bnd(2, velocY, N_grid);
+}
+
+function advect(b, d, d0, velocX, velocY, dt, N_grid)
+{
+    let i0, i1, j0, j1;
+    let dt0 = dt * N_grid;
+    for (let j = 1; j <= N_grid; j++)
+    {
+        for (let i = 1; i <= N_grid; i++)
+        {
+            let tmp1 = dt0 * velocX[IX_solver(i, j, N_grid)];
+            let tmp2 = dt0 * velocY[IX_solver(i, j, N_grid)];
+            let x = i - tmp1;
+            let y = j - tmp2;
+            if (x < 0.5)
+            {
+                x = 0.5;
+            }
+            if (x > N_grid + 0.5)
+            {
+                x = N_grid + 0.5;
+            }
+            i0 = Math.floor(x);
+            i1 = i0 + 1.0;
+            if (y < 0.5)
+            {
+                y = 0.5;
+            }
+            if (y > N_grid + 0.5)
+            {
+                y = N_grid + 0.5;
+            }
+            j0 = Math.floor(y);
+            j1 = j0 + 1.0;
+            let s1 = x - i0;
+            let s0 = 1.0 - s1;
+            let t1 = y - j0;
+            let t0 = 1.0 - t1;
+            const left = t0 * d0[IX_solver(i0, j0, N_grid)] + t1 * d0[IX_solver(i0, j1, N_grid)];
+            const right = t0 * d0[IX_solver(i1, j0, N_grid)] + t1 * d0[IX_solver(i1, j1, N_grid)];
+            d[IX_solver(i, j, N_grid)] = s0 * left + s1 * right;
+        }
+    }
+    set_bnd(b, d, N_grid);
+}
+
+function set_bnd(b, x, N_grid)
+{
+    let signX = 1;
+    let signY = 1;
+    if (b === 1)
+    {
+        signX = -1;
+    }
+    if (b === 2)
+    {
+        signY = -1;
+    }
+    for (let k = 1; k <= N_grid; k++)
+    {
+        x[IX_solver(k, 0, N_grid)] = signY * x[IX_solver(k, 1, N_grid)];
+        x[IX_solver(k, N_grid + 1, N_grid)] = signY * x[IX_solver(k, N_grid, N_grid)];
+        x[IX_solver(0, k, N_grid)] = signX * x[IX_solver(1, k, N_grid)];
+        x[IX_solver(N_grid + 1, k, N_grid)] = signX * x[IX_solver(N_grid, k, N_grid)];
+    }
+    x[IX_solver(0, 0, N_grid)] = 0.5 * (x[IX_solver(1, 0, N_grid)] + x[IX_solver(0, 1, N_grid)]);
+    x[IX_solver(0, N_grid + 1, N_grid)] = 0.5 * (x[IX_solver(1, N_grid + 1, N_grid)] + x[IX_solver(0, N_grid, N_grid)]);
+    x[IX_solver(N_grid + 1, 0, N_grid)] = 0.5 * (x[IX_solver(N_grid, 0, N_grid)] + x[IX_solver(N_grid + 1, 1, N_grid)]);
+    x[IX_solver(N_grid + 1, N_grid + 1, N_grid)] = 0.5 * (x[IX_solver(N_grid, N_grid + 1, N_grid)] + x[IX_solver(N_grid + 1, N_grid, N_grid)]);
+}
+
+let fluid = new FluidSquare(N, DIFF, VISC, DT);
+let animationFrameId;
+
+let lastMouseX = -1;
+let lastMouseY = -1;
+let mouseIsDown = false;
+let lastTouchX = -1;
+let lastTouchY = -1;
+let touchIsActive = false;
+
+function getEventPos(canvasElement, event)
+{
+    const rect = canvasElement.getBoundingClientRect();
+    let clientX;
+    let clientY;
+    if (event.touches && event.touches.length > 0)
+    {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    }
+    else
+    {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+    return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function addDensityInRadius(centerX, centerY, radius, amount)
+{
+    for (let offsetY = -Math.floor(radius); offsetY <= Math.floor(radius); offsetY++)
+    {
+        for (let offsetX = -Math.floor(radius); offsetX <= Math.floor(radius); offsetX++)
+        {
+            let distSq = offsetX * offsetX + offsetY * offsetY;
+            if (distSq <= radius * radius)
+            {
+                let targetX = centerX + offsetX;
+                let targetY = centerY + offsetY;
+                if (targetX >= 1 && targetX <= N && targetY >= 1 && targetY <= N)
+                {
+                    fluid.addDensity(targetX, targetY, amount * (1 - Math.sqrt(distSq) / (radius + 1)));
+                }
+            }
+        }
+    }
+}
+
+function pressAt(pos)
+{
+    if (SCALE > 0)
+    {
+        let gridX = Math.floor(pos.x / SCALE);
+        let gridY = Math.floor(pos.y / SCALE);
+        addDensityInRadius(gridX, gridY, N / 24, 2.5);
+    }
+}
+
+function dragTo(pos, lastX, lastY, addInk)
+{
+    if (lastX === -1 || lastY === -1 || SCALE <= 0)
+    {
+        return;
+    }
+    const VEL_STRENGTH = 1.8;
+    let dx = (pos.x - lastX) * VEL_STRENGTH / SCALE;
+    let dy = (pos.y - lastY) * VEL_STRENGTH / SCALE;
+    let gridX = Math.floor(pos.x / SCALE);
+    let gridY = Math.floor(pos.y / SCALE);
+    fluid.addVelocity(gridX, gridY, dx, dy);
+    if (addInk)
+    {
+        addDensityInRadius(gridX, gridY, N / 32, 0.6);
+    }
+}
+
+canvas.addEventListener('mousedown', e =>
+{
+    mouseIsDown = true;
+    const pos = getEventPos(canvas, e);
+    pressAt(pos);
+    lastMouseX = pos.x;
+    lastMouseY = pos.y;
+});
+
+canvas.addEventListener('mousemove', e =>
+{
+    const pos = getEventPos(canvas, e);
+    dragTo(pos, lastMouseX, lastMouseY, mouseIsDown);
+    lastMouseX = pos.x;
+    lastMouseY = pos.y;
+});
+
+canvas.addEventListener('mouseup', () =>
+{
+    mouseIsDown = false;
+});
+
+canvas.addEventListener('mouseleave', () =>
+{
+    mouseIsDown = false;
+    lastMouseX = -1;
+    lastMouseY = -1;
+});
+
+canvas.addEventListener('mouseenter', e =>
+{
+    const pos = getEventPos(canvas, e);
+    lastMouseX = pos.x;
+    lastMouseY = pos.y;
+    mouseIsDown = (e.buttons === 1);
+});
+
+canvas.addEventListener('touchstart', e =>
+{
+    e.preventDefault();
+    if (e.touches.length > 0)
+    {
+        touchIsActive = true;
+        const pos = getEventPos(canvas, e);
+        pressAt(pos);
+        lastTouchX = pos.x;
+        lastTouchY = pos.y;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e =>
+{
+    e.preventDefault();
+    if (touchIsActive && e.touches.length > 0)
+    {
+        const pos = getEventPos(canvas, e);
+        dragTo(pos, lastTouchX, lastTouchY, true);
+        lastTouchX = pos.x;
+        lastTouchY = pos.y;
+    }
+}, { passive: false });
+
+function endTouch()
+{
+    touchIsActive = false;
+    lastTouchX = -1;
+    lastTouchY = -1;
+}
+
+canvas.addEventListener('touchend', endTouch);
+canvas.addEventListener('touchcancel', endTouch);
+
+function addInitialDensity(fluidInstance)
+{
+    const centerX = Math.floor(N / 2);
+    const centerY = Math.floor(N / 2);
+    const radius = Math.floor(N / 5);
+    addDensityInRadius(centerX, centerY, radius, 0.6);
+    addDensityInRadius(Math.floor(N / 3.5), Math.floor(N / 3.5), N / 40, 0.5);
+    addDensityInRadius(Math.floor(2.5 * N / 3.5), Math.floor(2.5 * N / 3.5), N / 40, 0.4);
+}
+
+let resizeTimeout;
+function setupCanvas()
+{
+    const newScale = Math.min(window.innerWidth / (N + 2), window.innerHeight / (N + 2));
+    SCALE = Math.max(newScale, 0.1);
+    canvas.width = (N + 2) * SCALE;
+    canvas.height = (N + 2) * SCALE;
+}
+
+function loadRandomScreenshot()
+{
+    imageLoaded = false;
+    const index = Math.floor(Math.random() * SCREENSHOTS.length);
+    backgroundImage.src = SCREENSHOTS[index];
+}
+
+backgroundImage.onload = () =>
+{
+    imageLoaded = true;
+    if (!animationFrameId)
+    {
+        animate();
+    }
+};
+
+backgroundImage.onerror = () =>
+{
+    console.error("Failed to load background image. Animation will proceed with fallback.");
+    imageLoaded = true;
+    if (!animationFrameId)
+    {
+        animate();
+    }
+};
+
+function animate()
+{
+    fluid.step();
+    fluid.render(ctx, backgroundImage);
+    animationFrameId = requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', () =>
+{
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(setupCanvas, 100);
+});
+
+addInitialDensity(fluid);
+setupCanvas();
+loadRandomScreenshot();
+</script>
+</body>
+</html>
